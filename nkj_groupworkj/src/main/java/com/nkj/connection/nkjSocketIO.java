@@ -12,12 +12,34 @@ import io.socket.client.Socket;
 public class nkjSocketIO {
 	private IO.Options options = new IO.Options();
 
-	private void PiConnection() {
-		options.reconnectionAttempts = 10;
-		options.reconnectionDelay = 1000;
-		options.timeout = 500;
+	private void ConnectOptionsSetup() {
+		options.reconnectionAttempts = 5;	//重試次數 int
+		options.reconnectionDelay = 1000;	//重試間格 int ms
+		options.timeout = 500;				//判斷為失敗的超時時間 int ms
 	}
-
+	
+	/**
+	 * Create connection and show connection stste.
+	 * 
+	 * @param url      (String)>>>e.g.: http://192.168.137.10:5000
+	 * @param listener (String)>>>The listener name on raspi python controller.
+	 * @return No return value.
+	 */
+	public void IOCreateConnection(String url, String listener) {
+		ConnectOptionsSetup();
+		try {
+			final Socket socket = IO.socket(url, options);
+			String msgPrefix = url + ": [" + listener + "]|>> ";
+			socket.on(Socket.EVENT_CONNECT, objects -> System.out.println(msgPrefix + "已建立連線"));
+			socket.on(Socket.EVENT_DISCONNECT, objects -> System.out.println(msgPrefix + "連線中斷"));
+			socket.on(Socket.EVENT_CONNECT_ERROR, objects -> System.out.println(msgPrefix + "連線失敗"));
+			socket.connect();
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * Control raspi Camera on off.
 	 * 
@@ -28,7 +50,7 @@ public class nkjSocketIO {
 	 */
 	public void PiCameraSwitch(String url, String listener, Boolean onoff) {
 		try {
-			PiConnection();
+			ConnectOptionsSetup();
 			final Socket socket = IO.socket(url, options);
 			socket.emit(listener, onoff);
 //			socket.on("msg", objects -> System.out.println("client: 收到msg->" + Arrays.toString(objects)));
@@ -56,7 +78,7 @@ public class nkjSocketIO {
 	 */
 	public void PiListener(String url, String listener) {
 		try {
-			PiConnection();
+			ConnectOptionsSetup();
 			final Socket socket = IO.socket(url, options);
 			socket.on("sub", objects -> {
 				System.out.println(Arrays.toString(objects));

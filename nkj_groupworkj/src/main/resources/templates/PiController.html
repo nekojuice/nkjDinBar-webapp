@@ -18,7 +18,13 @@
         $(document).ready(function () {
             // Socket.IO Start connect
             var socket = io.connect();
-
+			
+            //java socketio test1
+            $("#camera_on").click(function (e) {
+                socket.emit('test1', -5, 5);
+            });
+            
+            
             //啟動時就抓取現在step數
             socket.emit('update_step_reqiure');
             socket.on('update_step_response', function (data) {
@@ -98,6 +104,14 @@
             $("#sys_shutdown").click(function (e) {
                 socket.emit('sys_shutdown');
             });
+            
+            //相機開關
+            $("#camera_on").click(function (e) {
+                socket.emit('camera_switch', 'on');
+            });
+            $("#camera_off").click(function (e) {
+                socket.emit('camera_switch', 'off');
+            });
         });
 
         //range bar 和 text 互相mapping
@@ -125,6 +139,7 @@
 <body>
     <h3>Picture</h3>
     <img src="{{ url_for('video_feed') }}" alt="...相機已離線或未啟動...">
+    <br>
     <button class='camera_switch' type="button" id='camera_on'>相機:開</button>
     <br>
     <button class='camera_switch' type="button" id='camera_off'>關</button>
