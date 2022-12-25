@@ -1,4 +1,4 @@
-package com.nkj.socketio.test;
+package com.nkj.test;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;

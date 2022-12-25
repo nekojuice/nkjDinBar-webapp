@@ -1,192 +1,296 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" th:href="@{css/controller.css}">
-    <!-- JQuery 的 CDN 連結 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
-        integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        
-    <!-- Socket.IO 的 CDN 連結 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"
-        integrity="sha512-WL6WGKMPBiM9PnHRYIn5YEtq0Z8XP4fkVb4qy7PP4vhmYQErJ/dySyXuFIMDf1eEYCXCrQrMJfkNwKc9gsjTjA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    
-
-    <script type="text/javascript" charset="utf-8">
-        $(document).ready(function () {
-            // Socket.IO Start connect
-            var socket = io.connect();
-			
-            //java socketio test1
-            $("#camera_on").click(function (e) {
-                socket.emit('test1', -5, 5);
-            });
-            
-            
-            //啟動時就抓取現在step數
-            socket.emit('update_step_reqiure');
-            socket.on('update_step_response', function (data) {
-                $('#horz_current').val(data[0]);
-                $('#horz_current_bar').val(data[0]);
-                $('#vert_current').val(data[0]);
-                $('#vert_current_bar').val(data[1]);
-                $('#horz_current_ang').val(data[0]/4096*360);
-                $('#vert_current_ang').val(data[1]/4096*360);
-            });
-
-            socket.on('horz_current', function (data) {
-                $('#horz_current').val(data);
-                $('#horz_current_bar').val(data);
-                $('#horz_current_ang').val(data/4096*360);
-            });
-            socket.on('vert_current', function (data) {
-                $('#vert_current').val(data);
-                $('#vert_current_bar').val(data);
-                $('#vert_current_ang').val(data/4096*360);
-            });
-
-            $("#d_7").click(function (e) {
-                socket.emit('button_execute', -5, 5);
-            });
-            $("#d_8").click(function (e) {
-                socket.emit('button_execute',0, 5);
-            });
-            $("#d_9").click(function (e) {
-                socket.emit('button_execute', 5, 5);
-            });
-            $("#d_4").click(function (e) {
-                socket.emit('button_execute', -5, 0);
-            });
-            $("#d_6").click(function (e) {
-                socket.emit('button_execute', 5, 0);
-            });
-            $("#d_1").click(function (e) {
-                socket.emit('button_execute', -5, -5);
-            });
-            $("#d_2").click(function (e) {
-                socket.emit('button_execute', 0, -5);
-            });
-            $("#d_3").click(function (e) {
-                socket.emit('button_execute', 5, -5);
-            });
-            
-            //歸零
-            $("#d_5").click(function (e) {
-                socket.emit('zero_point_execute');
-                $("#bar_vert").val(0);
-                $("#bar_horz").val(0);
-                $("#text_vert").val(0);
-                $("#text_horz").val(0); 
-            });
-
-            //post文字方塊的數值
-            $("#execute").click(function (e) {
-                socket.emit('coordinate_execute', $("#text_horz").val(), $("#text_vert").val());
-            });
-            
-            //校正, CAL, 將目前角度設為原點
-            $("#cal_button").click(function (e) {
-                socket.emit('calibration');
-                $("#bar_vert").val(0);
-                $("#bar_horz").val(0);
-                $("#text_vert").val(0);
-                $("#text_horz").val(0); 
-                $("#vert_change_ang").val(0);
-                $("#horz_change_ang").val(0);
-            });
-            //重啟
-            $("#sys_restart").click(function (e) {
-                socket.emit('sys_restart');
-            });
-            //關閉
-            $("#sys_shutdown").click(function (e) {
-                socket.emit('sys_shutdown');
-            });
-            
-            //相機開關
-            $("#camera_on").click(function (e) {
-                socket.emit('camera_switch', 'on');
-            });
-            $("#camera_off").click(function (e) {
-                socket.emit('camera_switch', 'off');
-            });
-        });
-
-        //range bar 和 text 互相mapping
-        function change_text_vert() {
-            $("#bar_vert").val( $("#text_vert").val());
-            $("#vert_change_ang").val( ($("#text_vert").val())/4096*360);
-        }
-        function change_text_horz() {
-            $("#bar_horz").val( $("#text_horz").val());
-            $("#horz_change_ang").val( ($("#text_horz").val())/4096*360);
-        }
-        function change_bar_vert() {
-            $("#text_vert").val( $("#bar_vert").val());
-            $("#vert_change_ang").val( ($("#bar_vert").val())/4096*360);
-        }
-        function change_bar_horz() {
-            $("#text_horz").val( $("#bar_horz").val()); 
-            $("#horz_change_ang").val( ($("#bar_horz").val())/4096*360);
-        }
+<meta charset="UTF-8">
+<link rel="stylesheet" th:href="@{/css/controller.css}">
+<!-- JQuery 的 CDN 連結 -->
+<script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js}"
+	integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous"
+	referrerpolicy="no-referrer"></script>
+<script th:src="@{https://cdn.socket.io/4.5.4/socket.io.min.js}"></script>
+<!-- Socket.IO 的 CDN 連結 -->
 
 
-    </script>        
+
+<script type="text/javascript" charset="utf-8">
+	var websocket = null;
+	//判斷當前瀏覽器是否支持WebSocket
+	if ('WebSocket' in window) {
+		//改成你的地址
+		websocket = new WebSocket(
+				"ws://127.0.0.1:8080/websocket/100");
+	} else {
+		alert('當前瀏覽器不支援 websocket')
+	}
+
+	//連接發生錯誤的回調方法
+	websocket.onerror = function() {
+		setMessageInnerHTML("WebSocket連接發生錯誤");
+	};
+
+	//連接成功建立的回調方法
+	websocket.onopen = function() {
+		setMessageInnerHTML("WebSocket連接成功");
+	}
+
+	//接收到消息的回調方法
+	websocket.onmessage = function(event) {
+		console.log(event);
+		setMessageInnerHTML(event.data);
+	}
+
+	//連接關閉的回調方法
+	websocket.onclose = function() {
+		setMessageInnerHTML("WebSocket連接關閉");
+	}
+
+	//監聽窗口關閉事件，當窗口關閉時，主動去關閉websocket連接，防止連接還沒斷開就關閉窗口，server端會拋異常。
+	window.onbeforeunload = function() {
+		closeWebSocket();
+	}
+
+	//將消息顯示在網頁上
+	function setMessageInnerHTML(innerHTML) {
+		document.getElementById('message').innerHTML = innerHTML + '<br/>' + document.getElementById('message').innerHTML;
+	}
+
+	//關閉WebSocket連接
+	function closeWebSocket() {
+		websocket.close();
+	}
+
+	//發送消息
+	function send() {
+		var message = document.getElementById('text').value;
+		if(message != "") {
+			websocket.send(message);
+		}
+		//setMessageInnerHTML(message + "");
+	}
+
+	$(document).ready(
+			function() {
+				//java socketio test1
+				$("#camera_on").click(function(e) {
+					websocket.send('/pi camera on');
+				});
+				$("#camera_off").click(function(e) {
+					websocket.send('/pi camera off');
+				});
+
+				//啟動時就抓取現在step數
+				/*socket.emit('update_step_reqiure');
+				socket.on('update_step_response', function(data) {
+					$('#horz_current').val(data[0]);
+					$('#horz_current_bar').val(data[0]);
+					$('#vert_current').val(data[0]);
+					$('#vert_current_bar').val(data[1]);
+					$('#horz_current_ang').val(data[0] / 4096 * 360);
+					$('#vert_current_ang').val(data[1] / 4096 * 360);
+				});
+
+				socket.on('horz_current', function(data) {
+					$('#horz_current').val(data);
+					$('#horz_current_bar').val(data);
+					$('#horz_current_ang').val(data / 4096 * 360);
+				});
+				socket.on('vert_current', function(data) {
+					$('#vert_current').val(data);
+					$('#vert_current_bar').val(data);
+					$('#vert_current_ang').val(data / 4096 * 360);
+				});
+
+				$("#d_7").click(function(e) {
+					socket.emit('button_execute', -5, 5);
+				});
+				$("#d_8").click(function(e) {
+					socket.emit('button_execute', 0, 5);
+				});
+				$("#d_9").click(function(e) {
+					socket.emit('button_execute', 5, 5);
+				});
+				$("#d_4").click(function(e) {
+					socket.emit('button_execute', -5, 0);
+				});
+				$("#d_6").click(function(e) {
+					socket.emit('button_execute', 5, 0);
+				});
+				$("#d_1").click(function(e) {
+					socket.emit('button_execute', -5, -5);
+				});
+				$("#d_2").click(function(e) {
+					socket.emit('button_execute', 0, -5);
+				});
+				$("#d_3").click(function(e) {
+					socket.emit('button_execute', 5, -5);
+				});
+
+				//歸零
+				$("#d_5").click(function(e) {
+					socket.emit('zero_point_execute');
+					$("#bar_vert").val(0);
+					$("#bar_horz").val(0);
+					$("#text_vert").val(0);
+					$("#text_horz").val(0);
+				});
+
+				//post文字方塊的數值
+				$("#execute").click(
+						function(e) {
+							socket.emit('coordinate_execute', $("#text_horz")
+									.val(), $("#text_vert").val());
+						});
+
+				//校正, CAL, 將目前角度設為原點
+				$("#cal_button").click(function(e) {
+					socket.emit('calibration');
+					$("#bar_vert").val(0);
+					$("#bar_horz").val(0);
+					$("#text_vert").val(0);
+					$("#text_horz").val(0);
+					$("#vert_change_ang").val(0);
+					$("#horz_change_ang").val(0);
+				});
+				//重啟
+				$("#sys_restart").click(function(e) {
+					socket.emit('sys_restart');
+				});
+				//關閉
+				$("#sys_shutdown").click(function(e) {
+					socket.emit('sys_shutdown');
+				});
+
+				//相機開關
+				$("#camera_on").click(function(e) {
+					socket.emit('camera_switch', 'on');
+				});
+				$("#camera_off").click(function(e) {
+					socket.emit('camera_switch', 'off');
+				});*/
+			});
+
+	//range bar 和 text 互相mapping
+	function change_text_vert() {
+		$("#bar_vert").val($("#text_vert").val());
+		$("#vert_change_ang").val(($("#text_vert").val()) / 4096 * 360);
+	}
+	function change_text_horz() {
+		$("#bar_horz").val($("#text_horz").val());
+		$("#horz_change_ang").val(($("#text_horz").val()) / 4096 * 360);
+	}
+	function change_bar_vert() {
+		$("#text_vert").val($("#bar_vert").val());
+		$("#vert_change_ang").val(($("#bar_vert").val()) / 4096 * 360);
+	}
+	function change_bar_horz() {
+		$("#text_horz").val($("#bar_horz").val());
+		$("#horz_change_ang").val(($("#bar_horz").val()) / 4096 * 360);
+	}
+</script>
 </head>
 
 <body>
-    <h3>Picture</h3>
-    <img src="{{ url_for('video_feed') }}" alt="...相機已離線或未啟動...">
-    <br>
-    <button class='camera_switch' type="button" id='camera_on'>相機:開</button>
-    <br>
-    <button class='camera_switch' type="button" id='camera_off'>關</button>
+	<h3>Picture</h3>
+	<img src="{{ url_for('video_feed') }}" alt="...相機已離線或未啟動...">
+	<br>
+	<button class='camera_switch' type="button" id='camera_on'>相機:開</button>
+	<br>
+	<button class='camera_switch' type="button" id='camera_off'>關</button>
 
-    <table border="1" style:'text-align: center;'>
-        <tr align='center'>
-            <td rowspan="3"><input type='text' id='vert_current' disabled value="0" class='textbox_current'>t<br>
-                <input type='text' id='vert_current_ang' disabled value=0 class='textbox_current'>°</td>
-            <td rowspan="3" align='right'><input type="range" orient="vertical"  min="-512" max="512" value="0" class="bar_vert" id="vert_current_bar" disabled></td>
-            <td rowspan="3" align='right'><input type="range" orient="vertical"  min="-512" max="512" value="0" class="bar_vert" id="bar_vert" oninput="change_bar_vert()"></td>
-            <td rowspan="3"><input type="text" id='text_vert' oninput="change_text_vert()" value="0" class='textbox_change'>t<br>
-                <input type='text' id='vert_change_ang' disabled value=0 class='textbox_change'>°</td>
-            <td><button class='direction_button' type="button" id='d_7'>↖</button></td>
-            <td><button class='direction_button' type="button" id='d_8'>↑</button></td>
-            <td><button class='direction_button' type="button" id='d_9'>↗</button></td>
-        </tr>
-        <tr align='center'>
-            <td><button class='direction_button' type="button" id='d_4'>←</button></td>
-            <td><button class='direction_button' type="button" id='d_5'>＋</button></td>
-            <td><button class='direction_button' type="button" id='d_6'>→</button></td>
-        </tr>
-        <tr align='center'> 
-            <td><button class='direction_button' type="button" id='d_1'>↙</button></td>
-            <td><button class='direction_button' type="button" id='d_2'>↓</button></td>
-            <td><button class='direction_button' type="button" id='d_3'>↘</button></td>
-        </tr>
-        <tr align='center'>
-            <td rowspan="4" colspan="4"><button class='execute_button' type="button" id='execute'>傳送轉動角度</button></td>
-            <td colspan="3"><input type="text" id='text_horz' oninput="change_text_horz()" value="0" class='textbox_change'>t<br>
-                <input type='text' id='horz_change_ang' disabled value=0 class='textbox_change'>°</td>
-        </tr>
-        <tr>
-            <td colspan="3"><input type="range" min="-864" max="864" value="0" class="bar_horz" id="bar_horz" oninput="change_bar_horz()"></td>
-        </tr>
-        <tr>
-            <td colspan="3"><input type="range" min="-864" max="864" value="0" class="bar_horz" id="horz_current_bar" disabled></td>
-        </tr>
-        <tr align='center'>
-            <td colspan="3"><input type='text' id='horz_current' disabled value="0" class='textbox_current'>t<br>
-                <input type='text' id='horz_current_ang' disabled value=0 class='textbox_current'>°</td>
-        </tr>
-    </table>
-    <br>
-    <button class='cal_button' type="button" id='cal_button'>CAL將目前角度設為原點</button>
-    <br>
-    <br>
-    <button class='sys_shutdown' type="button" id='sys_shutdown'>關閉程式</button>
-    
+	<table border="1" style:'text-align:center;'>
+		<tr align='center'>
+			<td rowspan="3">
+				<input type='text' id='vert_current' disabled value="0" class='textbox_current'>
+				t
+				<br>
+				<input type='text' id='vert_current_ang' disabled value=0 class='textbox_current'>
+				°
+			</td>
+			<td rowspan="3" align='right'>
+				<input type="range" orient="vertical" min="-512" max="512" value="0" class="bar_vert" id="vert_current_bar" disabled>
+			</td>
+			<td rowspan="3" align='right'>
+				<input type="range" orient="vertical" min="-512" max="512" value="0" class="bar_vert" id="bar_vert" oninput="change_bar_vert()">
+			</td>
+			<td rowspan="3">
+				<input type="text" id='text_vert' oninput="change_text_vert()" value="0" class='textbox_change'>
+				t
+				<br>
+				<input type='text' id='vert_change_ang' disabled value=0 class='textbox_change'>
+				°
+			</td>
+			<td>
+				<button class='direction_button' type="button" id='d_7'>↖</button>
+			</td>
+			<td>
+				<button class='direction_button' type="button" id='d_8'>↑</button>
+			</td>
+			<td>
+				<button class='direction_button' type="button" id='d_9'>↗</button>
+			</td>
+		</tr>
+		<tr align='center'>
+			<td>
+				<button class='direction_button' type="button" id='d_4'>←</button>
+			</td>
+			<td>
+				<button class='direction_button' type="button" id='d_5'>＋</button>
+			</td>
+			<td>
+				<button class='direction_button' type="button" id='d_6'>→</button>
+			</td>
+		</tr>
+		<tr align='center'>
+			<td>
+				<button class='direction_button' type="button" id='d_1'>↙</button>
+			</td>
+			<td>
+				<button class='direction_button' type="button" id='d_2'>↓</button>
+			</td>
+			<td>
+				<button class='direction_button' type="button" id='d_3'>↘</button>
+			</td>
+		</tr>
+		<tr align='center'>
+			<td rowspan="4" colspan="4">
+				<button class='execute_button' type="button" id='execute'>傳送轉動角度</button>
+			</td>
+			<td colspan="3">
+				<input type="text" id='text_horz' oninput="change_text_horz()" value="0" class='textbox_change'>
+				t
+				<br>
+				<input type='text' id='horz_change_ang' disabled value=0 class='textbox_change'>
+				°
+			</td>
+		</tr>
+		<tr>
+			<td colspan="3">
+				<input type="range" min="-864" max="864" value="0" class="bar_horz" id="bar_horz" oninput="change_bar_horz()">
+			</td>
+		</tr>
+		<tr>
+			<td colspan="3">
+				<input type="range" min="-864" max="864" value="0" class="bar_horz" id="horz_current_bar" disabled>
+			</td>
+		</tr>
+		<tr align='center'>
+			<td colspan="3">
+				<input type='text' id='horz_current' disabled value="0" class='textbox_current'>
+				t
+				<br>
+				<input type='text' id='horz_current_ang' disabled value=0 class='textbox_current'>
+				°
+			</td>
+		</tr>
+	</table>
+	<br>
+	<button class='cal_button' type="button" id='cal_button'>CAL將目前角度設為原點</button>
+	<br>
+	<br>
+	<button class='sys_shutdown' type="button" id='sys_shutdown'>關閉程式</button>
+	<br>
+	<input id="text" type="text"></input><button id="send_command" onclick="send()">發送指令</button>
+	<br>
+	<div id="message"></div>
 </body>
 </html>

@@ -1,4 +1,4 @@
-package com.nkj.socketio.test;
+package com.nkj.test;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,7 +12,7 @@ public class PythonTest {
 
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+
 		try {
 			//Runtime.getRuntime().exec("python script.py arg1 arg2");
 			//Process pr = Runtime.getRuntime().exec("python D:/Eclipse/Workspace/JavaEE/nkj_groupworkj/src/main/java/com/nkj/socketio/test/test.py");
@@ -29,7 +29,7 @@ public class PythonTest {
 			nkjSocketIO nkjSocketIO = new nkjSocketIO();
 			nkjSocketIO.PiCameraSwitch("cat", "dog", true);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 	}

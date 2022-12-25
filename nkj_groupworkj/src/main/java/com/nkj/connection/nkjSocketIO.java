@@ -35,7 +35,7 @@ public class nkjSocketIO {
 			socket.on(Socket.EVENT_CONNECT_ERROR, objects -> System.out.println(msgPrefix + "連線失敗"));
 			socket.connect();
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 	}
@@ -84,7 +84,7 @@ public class nkjSocketIO {
 				System.out.println(Arrays.toString(objects));
 			});
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 

@@ -1,4 +1,4 @@
-package com.nkj.socketio.test;
+package com.nkj.test;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,6 +8,7 @@ import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.nkj.connection.nkjSocketIO;
 
+@SuppressWarnings("unused")
 public class CallPyTest1 {
 
 	public static void main(String[] args) {
@@ -33,7 +34,7 @@ public class CallPyTest1 {
 		try {
 			Thread.sleep(1000);
 		} catch (Exception e) {
-			// TODO: handle exception
+
 		}
 		
 		System.out.println(Arrays.toString(emit));

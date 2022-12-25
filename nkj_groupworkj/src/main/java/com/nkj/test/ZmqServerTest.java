@@ -1,4 +1,4 @@
-package com.nkj.socketio.test;
+package com.nkj.test;
 
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;

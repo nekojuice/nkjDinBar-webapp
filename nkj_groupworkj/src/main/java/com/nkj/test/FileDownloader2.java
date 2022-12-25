@@ -1,4 +1,4 @@
-package com.nkj.socketio.test;
+package com.nkj.test;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +14,7 @@ public class FileDownloader2 {
 			File f = r.bytes("https://s.yimg.com/ny/api/res/1.2/MVNglMuGchD1wzV7B9kEug--/YXBwaWQ9aGlnaGxhbmRlcjt3PTk2MDtoPTYzODtjZj13ZWJw/https://media.zenfs.com/en/cna.com.tw/19043df38fb9f4af3af80089320021d8").
 					  save(File.createTempFile("google", ".png"));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 

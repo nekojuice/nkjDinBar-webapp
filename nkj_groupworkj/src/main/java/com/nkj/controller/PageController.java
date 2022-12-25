@@ -35,37 +35,47 @@ public class PageController {
 //		return "index";
 //	}
 	
-	@RequestMapping("/videoStream")
-	public String videoStream() {
-		return "videoStream.html";
-	}
+//	@RequestMapping("/videoStream")
+//	public String videoStream() {
+//		return "videoStream.html";
+//	}
 	
-	@RequestMapping("/pi")
-	public String PiController() {
-		return "PiController.html";
-	}
-	
-	@RequestMapping("/t1")
-	public String test1() {
-		String url = "http://127.0.0.1:8080/";
-		String listener = "test1";
-		IO.Options options = new IO.Options();
-		options.reconnectionAttempts = 5;	//重試次數 int
-		options.reconnectionDelay = 1000;	//重試間格 int ms
-		options.timeout = 500;				//判斷為失敗的超時時間 int ms
-		try {
-			final Socket socket = IO.socket(url, options);
-			String msgPrefix = url + ": [" + listener + "]|>> ";
-			socket.on(listener, objects -> System.out.println(msgPrefix + Arrays.toString(objects)));  // io.on here
-			
-			socket.on(Socket.EVENT_CONNECT, objects -> System.out.println(msgPrefix + "已建立連線"));
-			socket.on(Socket.EVENT_DISCONNECT, objects -> System.out.println(msgPrefix + "連線中斷"));
-			socket.on(Socket.EVENT_CONNECT_ERROR, objects -> System.out.println(msgPrefix + "連線失敗"));
-			socket.connect();
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return "PiController.html";
-	}
+//	@RequestMapping("/pi")
+//	public String PiController() {
+//		return "PiController.html";
+//	}
+//	
+//	@RequestMapping("/t1")
+//	public String test1() {
+//		Socket socket;
+//		try {
+//			socket = IO.socket("http://127.0.0.1:8080/t1");
+//			socket.on("camera_switch", listener ->  {
+//				System.out.println(Arrays.toString(listener));
+//			});
+//		} catch (URISyntaxException e) {
+
+//			e.printStackTrace();
+//		}
+//		String url = "http://127.0.0.1:8080/";
+//		String listener = "test1";
+//		IO.Options options = new IO.Options();
+//		options.reconnectionAttempts = 5;	//重試次數 int
+//		options.reconnectionDelay = 1000;	//重試間格 int ms
+//		options.timeout = 500;				//判斷為失敗的超時時間 int ms
+//		try {
+//			final Socket socket = IO.socket(url, options);
+//			String msgPrefix = url + ": [" + listener + "]|>> ";
+//			socket.on(listener, objects -> System.out.println(msgPrefix + Arrays.toString(objects)));  // io.on here
+//			
+//			socket.on(Socket.EVENT_CONNECT, objects -> System.out.println(msgPrefix + "已建立連線"));
+//			socket.on(Socket.EVENT_DISCONNECT, objects -> System.out.println(msgPrefix + "連線中斷"));
+//			socket.on(Socket.EVENT_CONNECT_ERROR, objects -> System.out.println(msgPrefix + "連線失敗"));
+//			socket.connect();
+//		} catch (URISyntaxException e) {
+
+//			e.printStackTrace();
+//		}
+//		return "PiController.html";
+//	}
 }

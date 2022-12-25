@@ -1,4 +1,4 @@
-package com.nkj.socketio.test;
+package com.nkj.test;
 
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
