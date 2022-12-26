@@ -26,19 +26,30 @@ def on_message(obj, msg):    # 接收訊息
     if msg == "/pi hi":
         ws.send("[pi]>> hello, connection to pi is OK!")
     if msg == "/pi camera on":
-        ws.send("[pi]>> raspberry camera switch on")
-        thread_container()
-        t2_Stream_sender.start()
+        ws.send("[pi]>> raspberry camera switching on...")
+        start_Stream_sender()
+        
     if msg == "/pi camera off":
+        ws.send("/java stream off")
         camera.release()
         ws.send("[pi]>> raspberry camera switch off")
     if msg == "/pi disconnect":
         ws.send("[pi]>> disconnecting...")
         ws.close()
+    if msg == "/pi exit":
+        ws.send("[pi]>> terminating process...")
+        ws.close()
+        os._exit(0)
 
-def thread_container():
+def start_Stream_sender():
+    try:
+        camera.release()
+    except:
+        pass
     global t2_Stream_sender
     t2_Stream_sender = threading.Thread(target = Stream_sender)
+    t2_Stream_sender.start()
+    ws.send("/java stream on")
     
 
 def socket_app():
@@ -70,8 +81,7 @@ def Stream_sender():
         rpi_name = socket.gethostname() # send RPi hostname with each image
         #camera.start()
         #camera = VideoStream(usePiCamera=True).start()
-        time.sleep(2.0)  # allow camera sensor to warm up
-
+        time.sleep(1.0)  # allow camera sensor to warm up
         while True:  # send images as stream until Ctrl-C
             success, image = camera.read()
             if not success:
@@ -86,6 +96,4 @@ def Stream_sender():
 
 if __name__ == '__main__':
     t1_socket_app = threading.Thread(target = socket_app)
-    
-    
     t1_socket_app.start()
