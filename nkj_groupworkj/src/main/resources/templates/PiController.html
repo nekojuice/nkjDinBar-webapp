@@ -36,7 +36,15 @@
 	//接收到消息的回調方法
 	websocket.onmessage = function(event) {
 		console.log(event);
+		if(event.data == "/java stream on") {
+			$('#iframe_stream').attr('src', 'http://127.0.0.1:5000/video');
+		}
+		else if(event.data == "/java stream off") {
+			$('#iframe_stream').attr('src', 'http://127.0.0.1:5000/blank');
+		}
+		else {
 		setMessageInnerHTML(event.data);
+		}
 	}
 
 	//連接關閉的回調方法
@@ -190,13 +198,15 @@
 </head>
 
 <body>
-	<h3>Picture</h3>
+	<iframe th:src="@{http://127.0.0.1:5000/blank}" width="640" height="480" id="iframe_stream" ></iframe>
+	<!--  
 	<img src="{{ url_for('video_feed') }}" alt="...相機已離線或未啟動...">
+	-->
 	<br>
 	<button class='camera_switch' type="button" id='camera_on'>相機:開</button>
 	<br>
 	<button class='camera_switch' type="button" id='camera_off'>關</button>
-
+<!-- 
 	<table border="1" style:'text-align:center;'>
 		<tr align='center'>
 			<td rowspan="3">
@@ -288,6 +298,7 @@
 	<br>
 	<br>
 	<button class='sys_shutdown' type="button" id='sys_shutdown'>關閉程式</button>
+ -->
 	<br>
 	<input id="text" type="text"></input><button id="send_command" onclick="send()">發送指令</button>
 	<br>
