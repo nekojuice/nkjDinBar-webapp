@@ -6,8 +6,9 @@ from imutils.video import VideoStream
 import imagezmq
 from flask import Flask, Response, render_template
 import os
+import time
 
-import pi_Mediapipe_face_deceted as ai
+import pi_Mediapipe_face_deceted as ai1
 
 
 app = Flask(__name__)
@@ -27,7 +28,7 @@ def Stream_receiver():
         print('串流接收異常')
 
 # 生成m-jpg
-def gen_frames():
+def gen_frames():   ## 這裡怪怪的
     try:
         while True:
             ret, buffer = cv2.imencode('.jpg', image)
@@ -68,28 +69,29 @@ def on_message(obj, msg):    # 接收自訂指令(訊息)
         
     if msg == "/fl ai1 on":
         ws.send("[flask]>> processing pi_Mediapipe_face_deceted.py...")
-        run_ai1()
+        thread_ai1()
     if msg == "/fl ai1 off":
         ws.send("[flask]>> terminating process: ai1")
         ai1_stop()
 
-def run_ai1():
-    global t4_run_ai1
-    t4_run_ai1 = threading.Thread(target = ai1)
+# ai1 mediapipe face rec.
+def thread_ai1():
+    t4_run_ai1 = threading.Thread(target = run_ai1, args=(1,))
     t4_run_ai1.start()
-
-def ai1():
+def run_ai1(scanrate):
+    global ai1_stop_flag
+    ai1_stop_flag = 0
     try:
         while True:
-            ai.M_face(image)
-            if stop_flag == True:
-                stop_flag = False
+            ai1.M_face(image)
+            time.sleep(1/scanrate)
+            if ai1_stop_flag == 1:
                 break
     except:
         print("ai1圖像辨識例外發生")
 def ai1_stop():
-    global stop_flag
-    stop_flag = True
+    global ai1_stop_flag
+    ai1_stop_flag = 1
           
 def run_socket_app():
     global ws

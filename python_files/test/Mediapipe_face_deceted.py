@@ -10,13 +10,13 @@ def _normalized_to_pixel_coordinates(
     image_height: int) -> Union[None, Tuple[int, int]]:
   """Converts normalized value pair to pixel coordinates."""
   # Checks if the float value is between 0 and 1.
-  def is_valid_normalized_value(value: float) -> bool:
-    return (value > 0 or math.isclose(0, value)) and (value < 1 or
-                                                      math.isclose(1, value))
-  if not (is_valid_normalized_value(normalized_x) and
-          is_valid_normalized_value(normalized_y)):
-  # TODO: Draw coordinates even if it's outside of the image bounds.
-    return None
+  # def is_valid_normalized_value(value: float) -> bool:
+  #   return (value > 0 or math.isclose(0, value)) and (value < 1 or
+  #                                                     math.isclose(1, value))
+  # if not (is_valid_normalized_value(normalized_x) and
+  #         is_valid_normalized_value(normalized_y)):
+  # # TODO: Draw coordinates even if it's outside of the image bounds.
+  #   return None
   x_px = min(math.floor(normalized_x * image_width), image_width - 1)
   y_px = min(math.floor(normalized_y * image_height), image_height - 1)
   return x_px, y_px
@@ -25,7 +25,7 @@ def _normalized_to_pixel_coordinates(
 def M_face():
   cap = cv2.VideoCapture(0)
   with mp_face_detection.FaceDetection(
-    min_detection_confidence=0.5) as face_detection:
+    min_detection_confidence=0.8) as face_detection:
     while cap.isOpened():
       success, image = cap.read()
       if not success:
@@ -56,7 +56,7 @@ def M_face():
             x, y, image_cols, image_rows)
           rect_end_point = _normalized_to_pixel_coordinates(
             x + w, y + h, image_cols, image_rows)
-          print(rect_start_point, rect_end_point, w * image_cols, h * image_rows)
+          #####print(rect_start_point, rect_end_point, w * image_cols, h * image_rows)
           cv2.rectangle(image, rect_start_point, rect_end_point, (0, 255, 0), 2)
           #cv2.line(image, rect_start_point, rect_end_point, (0, 255, 0), 2)
           #mp_drawing.draw_detection(image, detection)

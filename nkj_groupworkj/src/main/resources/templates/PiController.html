@@ -79,6 +79,12 @@
 	$(document).ready(
 			function() {
 				//java socketio test1
+				document.addEventListener('keydown', (e) => {
+				  if (e.code === "Enter") {
+					  send();
+				  }
+				});
+				
 				$("#camera_on").click(function(e) {
 					websocket.send('/pi camera on');
 				});
