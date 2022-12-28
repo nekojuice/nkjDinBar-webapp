@@ -29,6 +29,7 @@ def Stream_receiver():
 
 # 生成m-jpg
 def gen_frames():   ## 這裡怪怪的
+    time.sleep(1)
     try:
         while True:
             ret, buffer = cv2.imencode('.jpg', image)
@@ -38,7 +39,7 @@ def gen_frames():   ## 這裡怪怪的
     except KeyboardInterrupt:
         print('串流被管理員強制終止')
     except:
-        print('串流生成異常...')
+        print('串流生成失敗...可能相機未開或通信障礙')
 
 # 將jpg投到網址
 @app.route('/video')
@@ -74,19 +75,34 @@ def on_message(obj, msg):    # 接收自訂指令(訊息)
         ws.send("[flask]>> terminating process: ai1")
         ai1_stop()
 
+
 # ai1 mediapipe face rec.
+def goCenter(start, end, bond):
+    if start[0] < 320-(bond/2):
+        ws.send("/pi a -8 0")
+    if end[0] > 320+(bond/2):
+        ws.send("/pi a 8 0")
+    if start[1] < 240-(bond/2):
+        ws.send("/pi a 0 -8")
+    if end[1] > 240+(bond/2):
+        ws.send("/pi a 0 8")
 def thread_ai1():
-    t4_run_ai1 = threading.Thread(target = run_ai1, args=(1,))
+    t4_run_ai1 = threading.Thread(target = run_ai1, args=(1000,))
     t4_run_ai1.start()
 def run_ai1(scanrate):
     global ai1_stop_flag
     ai1_stop_flag = 0
     try:
         while True:
-            ai1.M_face(image)
-            time.sleep(1/scanrate)
-            if ai1_stop_flag == 1:
-                break
+            try:
+                rect_start_point, rect_end_point =  ai1.M_face(image)
+                goCenter(rect_start_point, rect_end_point, 250)
+            except:
+                pass
+            finally:
+                time.sleep(1/scanrate)
+                if ai1_stop_flag == 1:
+                    break
     except:
         print("ai1圖像辨識例外發生")
 def ai1_stop():

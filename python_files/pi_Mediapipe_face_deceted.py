@@ -47,12 +47,12 @@ def M_face(image):
             x, y, image_cols, image_rows)
           rect_end_point = _normalized_to_pixel_coordinates(
             x + w, y + h, image_cols, image_rows)
-          print(rect_start_point, rect_end_point, w * image_cols, h * image_rows)
+          #print(rect_start_point, rect_end_point, w * image_cols, h * image_rows) # 印出邊界及框框大小
           cv2.rectangle(image, rect_start_point, rect_end_point, (0, 255, 0), 2)
           #cv2.line(image, rect_start_point, rect_end_point, (0, 255, 0), 2)
-          #mp_drawing.draw_detection(image, detection)
-          
-      #cv2.imshow('MediaPipe Face Detection', image)
+          #mp_drawing.draw_detection(image, detection)  
+          return rect_start_point, rect_end_point
+      #cv2.imshow('MediaPipe Face Detection', image)  # 在副程式imshow會炸裂
 
 if __name__ == '__main__':
     M_face()

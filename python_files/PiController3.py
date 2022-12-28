@@ -34,7 +34,6 @@ SEQUENCE = [[1,1,0,0],  # -7    0
             [0,0,1,1],  # 5     12
             [0,0,0,1],  # 6     13
             [1,0,0,1]]  # 7     14
-stop_autorun_flag = 0
 
 def on_open(obj):
     print(obj, str("connecting..."))
@@ -46,6 +45,7 @@ def on_close(obj, status, msg):
 def on_data(obj, msg, data, isContinue):
     print(obj, msg)
 def on_message(obj, msg):    # 接收訊息(自定義指令)
+    global step_current
     global step_target
     # 測試連線是否通
     if msg == "/pi hi":
@@ -75,14 +75,24 @@ def on_message(obj, msg):    # 接收訊息(自定義指令)
         ws.send("[pi]>> auto_run is off")
         autorun_stop()
     # 設定target座標
-    if re.match('/pi m', msg):
+    if re.match('/pi t', msg):
         step_target = (piM.max_filter(list(map(int, re.split(' ', msg)[-2:])), STEP_MAX))
-        print(step_target)
+        ws.send("[pi]>> current: " + str(step_current) + " || target: " + str(step_target))
+    if re.match('/pi c', msg):
+        step_current = (piM.max_filter(list(map(int, re.split(' ', msg)[-2:])), STEP_MAX))
+        ws.send("[pi]>> current: " + str(step_current) + " || target: " + str(step_target))
+    # 增加單步
+    if re.match('/pi a', msg):
+        _ = list(map(int, re.split(' ', msg)[-2:]))
+        a = step_target[0] if _[0] == 0 else step_current[0] + _[0]
+        b = step_target[1] if _[1] == 0 else step_current[1] + _[1]
+        step_target = (piM.max_filter([a,b], STEP_MAX))
         
 ### 自動移動鏡頭(current track target) ###
 def autorun_stop():
     global stop_autorun_flag
     stop_autorun_flag = 1
+    piM.GPIO.cleanup()
 def auto_run():
     global stop_autorun_flag
     stop_autorun_flag = 0
@@ -96,19 +106,21 @@ def run_x():
     global stop_autorun_flag
     try:
         while True:
-            step_current[0] += piM.Run_a_step('x', piM.check_direction(step_current[0], step_target[0]), 100)[0]
+            step_current[0] += piM.Run_a_step('x', piM.check_direction(step_current[0], step_target[0]), 1000, SEQUENCE)[0]
             if stop_autorun_flag == 1:
                 break
-    except:
+    except Exception as e: 
+        print(e)
         print('run_x 發生錯誤')
 def run_y():
     global stop_autorun_flag
     try:
         while True:
-            step_current[1] += piM.Run_a_step('y', piM.check_direction(step_current[1], step_target[1]), 100)[1]
+            step_current[1] += piM.Run_a_step('y', piM.check_direction(step_current[1], step_target[1]), 1000, SEQUENCE)[1]
             if stop_autorun_flag == 1:
                 break
-    except:
+    except Exception as e: 
+        print(e)
         print('run_y 發生錯誤')
 ### 自動追蹤 ###
 

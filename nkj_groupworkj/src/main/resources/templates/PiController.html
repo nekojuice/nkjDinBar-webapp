@@ -35,9 +35,12 @@
 
 	//接收到消息的回調方法
 	websocket.onmessage = function(event) {
-		console.log(event);
+		//console.log(event);		
 		if(event.data == "/java stream on") {
 			$('#iframe_stream').attr('src', 'http://127.0.0.1:5000/video');
+			setTimeout(function() {
+				$('#iframe_stream').attr('src', 'http://127.0.0.1:5000/video');
+			}, 2000); //ms
 		}
 		else if(event.data == "/java stream off") {
 			$('#iframe_stream').attr('src', 'http://127.0.0.1:5000/blank');
@@ -90,6 +93,7 @@
 				});
 				$("#camera_off").click(function(e) {
 					websocket.send('/pi camera off');
+					websocket.send('/fl ai1 off');
 				});
 
 				//啟動時就抓取現在step數
@@ -204,7 +208,7 @@
 </head>
 
 <body>
-	<iframe th:src="@{http://127.0.0.1:5000/blank}" width="640" height="480" id="iframe_stream" ></iframe>
+	<iframe th:src="@{http://127.0.0.1:5000/video}" width="640" height="480" id="iframe_stream" ></iframe>
 	<!--  
 	<img src="{{ url_for('video_feed') }}" alt="...相機已離線或未啟動...">
 	-->
