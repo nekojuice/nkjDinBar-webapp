@@ -8,6 +8,7 @@ from flask import Flask, Response, render_template
 import os
 import time
 
+import Pi_mic_send as piAudio
 import pi_Mediapipe_face_deceted as ai1
 
 

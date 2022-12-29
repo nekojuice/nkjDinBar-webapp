@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{./Stylesheets/control_style.css}">
+    <script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js}"
+	integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous"
+	referrerpolicy="no-referrer"></script>
+    <title>控制介面</title>
+    <script type="text/javascript" charset="utf-8">
+    var websocket = null;
+	//判斷當前瀏覽器是否支持WebSocket
+	if ('WebSocket' in window) {
+		//改成你的地址
+		websocket = new WebSocket(
+				"ws://127.0.0.1:8080/websocket/100");
+	} else {
+		alert('當前瀏覽器不支援 websocket')
+	}
+
+	//連接發生錯誤的回調方法
+	websocket.onerror = function() {
+		setMessageInnerHTML("WebSocket連接發生錯誤");
+	};
+
+	//連接成功建立的回調方法
+	websocket.onopen = function() {
+		setMessageInnerHTML("WebSocket連接成功");
+	}
+
+	//接收到消息的回調方法
+	websocket.onmessage = function(event) {
+		//console.log(event);		
+		if(event.data == "/java stream on") {
+			$('#iframe_stream').attr('src', 'http://127.0.0.1:5000/video');
+			setTimeout(function() {
+				$('#iframe_stream').attr('src', 'http://127.0.0.1:5000/video');
+			}, 2000); //ms
+		}
+		else if(event.data == "/java stream off") {
+			$('#iframe_stream').attr('src', 'http://127.0.0.1:5000/blank');
+		}
+		else {
+		setMessageInnerHTML(event.data);
+		}
+	}
+
+	//連接關閉的回調方法
+	websocket.onclose = function() {
+		setMessageInnerHTML("WebSocket連接關閉");
+	}
+
+	//監聽窗口關閉事件，當窗口關閉時，主動去關閉websocket連接，防止連接還沒斷開就關閉窗口，server端會拋異常。
+	window.onbeforeunload = function() {
+		closeWebSocket();
+	}
+
+	//將消息顯示在網頁上
+	function setMessageInnerHTML(innerHTML) {
+		document.getElementById('message').innerHTML = innerHTML + '<br/>' + document.getElementById('message').innerHTML;
+	}
+
+	//關閉WebSocket連接
+	function closeWebSocket() {
+		websocket.close();
+	}
+
+	//發送消息
+	function send() {
+		var message = document.getElementById('text').value;
+		if(message != "") {
+			websocket.send(message);
+		}
+		//setMessageInnerHTML(message + "");
+	}
+
+	$(document).ready(
+			function() {
+				//java socketio test1
+				document.addEventListener('keydown', (e) => {
+				  if (e.code === "Enter") {
+					  send();
+				  }
+				});
+				
+				$("#camera_on").click(function(e) {
+					websocket.send('/pi camera on');
+				});
+				$("#camera_off").click(function(e) {
+					websocket.send('/pi camera off');
+					websocket.send('/fl ai1 off');
+				});
+
+				//啟動時就抓取現在step數
+				/*socket.emit('update_step_reqiure');
+				socket.on('update_step_response', function(data) {
+					$('#horz_current').val(data[0]);
+					$('#horz_current_bar').val(data[0]);
+					$('#vert_current').val(data[0]);
+					$('#vert_current_bar').val(data[1]);
+					$('#horz_current_ang').val(data[0] / 4096 * 360);
+					$('#vert_current_ang').val(data[1] / 4096 * 360);
+				});
+
+				socket.on('horz_current', function(data) {
+					$('#horz_current').val(data);
+					$('#horz_current_bar').val(data);
+					$('#horz_current_ang').val(data / 4096 * 360);
+				});
+				socket.on('vert_current', function(data) {
+					$('#vert_current').val(data);
+					$('#vert_current_bar').val(data);
+					$('#vert_current_ang').val(data / 4096 * 360);
+				});
+
+				$("#d_7").click(function(e) {
+					socket.emit('button_execute', -5, 5);
+				});
+				$("#d_8").click(function(e) {
+					socket.emit('button_execute', 0, 5);
+				});
+				$("#d_9").click(function(e) {
+					socket.emit('button_execute', 5, 5);
+				});
+				$("#d_4").click(function(e) {
+					socket.emit('button_execute', -5, 0);
+				});
+				$("#d_6").click(function(e) {
+					socket.emit('button_execute', 5, 0);
+				});
+				$("#d_1").click(function(e) {
+					socket.emit('button_execute', -5, -5);
+				});
+				$("#d_2").click(function(e) {
+					socket.emit('button_execute', 0, -5);
+				});
+				$("#d_3").click(function(e) {
+					socket.emit('button_execute', 5, -5);
+				});
+
+				//歸零
+				$("#d_5").click(function(e) {
+					socket.emit('zero_point_execute');
+					$("#bar_vert").val(0);
+					$("#bar_horz").val(0);
+					$("#text_vert").val(0);
+					$("#text_horz").val(0);
+				});
+
+				//post文字方塊的數值
+				$("#execute").click(
+						function(e) {
+							socket.emit('coordinate_execute', $("#text_horz")
+									.val(), $("#text_vert").val());
+						});
+
+				//校正, CAL, 將目前角度設為原點
+				$("#cal_button").click(function(e) {
+					socket.emit('calibration');
+					$("#bar_vert").val(0);
+					$("#bar_horz").val(0);
+					$("#text_vert").val(0);
+					$("#text_horz").val(0);
+					$("#vert_change_ang").val(0);
+					$("#horz_change_ang").val(0);
+				});
+				//重啟
+				$("#sys_restart").click(function(e) {
+					socket.emit('sys_restart');
+				});
+				//關閉
+				$("#sys_shutdown").click(function(e) {
+					socket.emit('sys_shutdown');
+				});
+
+				//相機開關
+				$("#camera_on").click(function(e) {
+					socket.emit('camera_switch', 'on');
+				});
+				$("#camera_off").click(function(e) {
+					socket.emit('camera_switch', 'off');
+				});*/
+			});
+
+	//range bar 和 text 互相mapping
+	function change_text_vert() {
+		$("#bar_vert").val($("#text_vert").val());
+		$("#vert_change_ang").val(($("#text_vert").val()) / 4096 * 360);
+	}
+	function change_text_horz() {
+		$("#bar_horz").val($("#text_horz").val());
+		$("#horz_change_ang").val(($("#text_horz").val()) / 4096 * 360);
+	}
+	function change_bar_vert() {
+		$("#text_vert").val($("#bar_vert").val());
+		$("#vert_change_ang").val(($("#bar_vert").val()) / 4096 * 360);
+	}
+	function change_bar_horz() {
+		$("#text_horz").val($("#bar_horz").val());
+		$("#horz_change_ang").val(($("#bar_horz").val()) / 4096 * 360);
+	}
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="login-left">
+            <div>
+                <label>
+                    <input type="checkbox" name="" id="" class="checkbox">
+                    <span class="btn-box">
+                        <span class="btn"></span>
+                    </span>
+                    <span class="text">開/關</span>
+                </label>
+            </div>
+            <form>請選擇模式<br>
+                <input type="radio" name="cat" value="ai" checked> AI<br>
+                <input type="radio" name="cat" value="?"><br>
+            </form>
+            <div>
+                <label>
+                    <input type="checkbox" name="" id="" class="checkbox">
+                    <span class="btn-box">
+                        <span class="btn"></span>
+                    </span>
+                    <span class="text">手/自動</span>
+                </label>
+            </div>
+            <div>
+                <label>
+                    <input type="checkbox" name="" id="" class="checkbox">
+                    <span class="btn-box">
+                        <span class="btn"></span>
+                    </span>
+                    <span class="text">管理員</span>
+                </label>
+            </div>
+            <form class="login-form">
+                <div class="login-form-content">
+                    <div class="form-item">
+                        <label for="histroy">歷史紀錄</label>
+                        <input type="text">
+                    </div>
+                    <div class="form-item">
+                        <label for="submit">輸入指令</label>
+                        <input type="text">
+                        <button type="submit">送出</button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+        <div class="login-right">
+            <table align="center" valign="center">
+                <tr>
+                    <td>
+                        <!-- <input type="text">
+                        <input type="text">
+                        <button type="button" class="btn btn-primary"> -->
+                    </td>
+                    <td align="center" valign="center">
+                        <img src="./images/white-down-arrow.png" style="transform:rotate(180deg);height: 72px">
+                    </td>
+                    <td>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <img src="./images/white-down-arrow.png" style="transform:rotate(90deg);height: 72px">
+                    </td>
+                    <td>
+                        <img class="img-fluid" src="./images/background-black.png">
+                    </td>
+                    <td>
+                        <img src="./images/white-down-arrow.png" style="transform:rotate(270deg);height: 72px">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+
+                    </td>
+                    <td align="center" valign="center">
+                        <img src="./images/white-down-arrow.png" style="height: 72px">
+                    </td>
+                    <td>
+
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

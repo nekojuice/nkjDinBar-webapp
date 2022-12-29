@@ -8,7 +8,8 @@ from imutils.video import VideoStream
 import imagezmq
 import re
 import PiMotorFunction as piM
-
+import pyaudio
+import select
 
 # ADDR = ws://[ip]:[port]/[path...]/[sid(channel)]
 #ADDR = 'ws://127.0.0.1:8080/websocket/100'
@@ -50,6 +51,15 @@ def on_message(obj, msg):    # 接收訊息(自定義指令)
     # 測試連線是否通
     if msg == "/pi hi":
         ws.send("[pi]>> hello, connection to pi is OK!")
+    # 開關麥克風串流
+    if msg == "/pi mic on":
+        
+        
+        ws.send("[pi]>> raspberry mic switching on...")
+    if msg == "/pi mic off":
+        ws.send("/java mic off")
+
+        ws.send("[pi]>> raspberry mic switch off")
     # 開關相機, 同時開關串流
     if msg == "/pi camera on":
         ws.send("/java stream on")
@@ -124,6 +134,78 @@ def run_y():
         print('run_y 發生錯誤')
 ### 自動追蹤 ###
 
+
+### 音訊發送 ###
+def audio_stop():
+    global audio_stop_flag
+    audio_stop_flag = 1
+def start_audio_sender():
+    try:
+        ###### t3_Audio_sender = threading.Thread(target = audio_sender)
+        ###### t3_Audio_sender.start()
+        ws.send("/java mic on")
+    except:
+        pass
+
+# def audio_sender():
+#     try:
+#         ######## piAudio.audio_send()
+#     except:
+#         pass
+
+def audio_send():
+    FORMAT = pyaudio.paInt16
+    CHANNELS = 1
+    RATE = 8000
+    CHUNK = 2048
+
+    audio = pyaudio.PyAudio()
+
+    serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    serversocket.bind(('', 9999))
+    serversocket.listen(5)
+
+
+    def callback(in_data, frame_count, time_info, status):
+        for s in read_list[1:]:
+            s.send(in_data)
+        return (None, pyaudio.paContinue)
+
+
+    # start Recording
+    stream = audio.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK, stream_callback=callback)
+    # stream.start_stream()
+
+    read_list = [serversocket]
+    print("recording...")
+
+    try:
+        while True:
+            readable, writable, errored = select.select(read_list, [], [])
+            for s in readable:
+                if s is serversocket:
+                    (clientsocket, address) = serversocket.accept()
+                    read_list.append(clientsocket)
+                    print("Connection from", address)
+                else:
+                    data = s.recv(1024)
+                    if not data:
+                        read_list.remove(s)
+    except KeyboardInterrupt:
+        pass
+
+
+    print("finished recording")
+
+    serversocket.close()
+    # stop Recording
+    stream.stop_stream()
+    stream.close()
+    audio.terminate()
+### 音訊發送 ###
+
+
+### 視訊發送 ###
 def start_Stream_sender():
     try:
         camera.release()
@@ -134,26 +216,6 @@ def start_Stream_sender():
     t2_Stream_sender.start()
     ws.send("/java stream on")
     
-
-def socket_app():
-    global ws
-    ws = WebSocketApp(
-        ADDR,
-        on_open=on_open,
-        on_message=on_message,
-        on_error=on_error,
-        on_close=on_close,
-        on_data=on_data)
-    ws.run_forever()
-
-# def socket_client():
-#     global ws
-#     ws = WebSocket()
-#     ws.connect(ADDR, origin=ADDR)
-    # ws.send("python say hi")
-    # print(ws.recv())
-    # ws.close()
-
 def Stream_sender():
     try:
         global camera
@@ -174,8 +236,26 @@ def Stream_sender():
                 sender.send_image(rpi_name, image)
     except:
         print("串流異常")
+### 視訊發送 ###
 
+def socket_app():
+    global ws
+    ws = WebSocketApp(
+        ADDR,
+        on_open=on_open,
+        on_message=on_message,
+        on_error=on_error,
+        on_close=on_close,
+        on_data=on_data)
+    ws.run_forever()
 
+# def socket_client():
+#     global ws
+#     ws = WebSocket()
+#     ws.connect(ADDR, origin=ADDR)
+    # ws.send("python say hi")
+    # print(ws.recv())
+    # ws.close()
 
 if __name__ == '__main__':
     t1_socket_app = threading.Thread(target = socket_app)
