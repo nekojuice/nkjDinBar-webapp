@@ -5,8 +5,7 @@ import java.util.Arrays;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-
+import org.springframework.web.servlet.ModelAndView;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -16,6 +15,13 @@ import io.socket.emitter.Emitter;
 @RestController
 public class ObjController {
 
+//	@RequestMapping("/")
+//	public ModelAndView index() {
+//		ModelAndView mav = new ModelAndView();
+//		mav.setViewName("index.html");
+//		return mav;
+//	}
+	
 //	@RequestMapping("/videoStream")
 //	public ModelAndView videoStream() {
 //		ModelAndView mav = new ModelAndView();

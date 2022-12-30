@@ -93,6 +93,13 @@
 			<version>0.5.3</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.webjars/bootstrap-sass -->
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>bootstrap-sass</artifactId>
+			<version>3.4.1</version>
+		</dependency>
+
 
 	</dependencies>
 

@@ -21,6 +21,16 @@ import io.socket.client.Socket;
 @SuppressWarnings("unused")
 @Controller
 public class PageController {
+
+	@RequestMapping("/")
+	public String index() {
+		return "index.html";
+	}
+	
+	@RequestMapping("/login")
+	public String login() {
+		return "login.html";
+	}
 	
 //	@ResponseStatus(value = HttpStatus.OK)
 //	@GetMapping(value = "/user/{name}")

@@ -1,62 +1,101 @@
 * {
-    box-sizing: border-box;
-  }
-  
-  body {
-    padding: 0;
-    margin: 0;
-    font-family: "Inter" sans-serif;
-    background: linear-gradient(45deg, #131086, #b621f3);
-    padding: 40px;
-  }
-  
-  .container {
-    min-height: calc(100vh - 80px);
-    display: grid;
-    grid-template-columns: 30% 70%;
-    border-radius: 10px;
-    overflow: hidden;
-  }
+  box-sizing: border-box;
+}
 
-  .login-left {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding-left: 150px;
-    background-color: white;
-  }
-  
-  .login-right {
-    background-color: #eee;
-    display: flex;
-    justify-content: content;
-  }
-  .btn-box {
-    display:inline-block;
-    vertical-align:middle;
-    width: 40px;
-    height: 20px;
-    border-radius:100px;
-    background-color: #ccc;
-    box-shadow: 0px 3px 0px rgba(0,0,0,.13) inset;
-  }
-  .btn-box .btn {
-    display:inline-block;
-    width: 20px;
-    height: 20px;
-    border-radius:50%;
-    background-color: #fff;
-    margin-left: 0;/*動畫從ml為0開始*/
-    transition: .5s;
-    box-shadow:1px 2px 5px rgba(0,0,0,.3);
-  }
-  .checkbox {
-    position:absolute;
-    opacity:0;
-  }
-  .checkbox:checked + .btn-box {
-    background-color: #8f8;
-  }
-  .checkbox:checked + .btn-box .btn {
-    margin-left: 20px;
-  }
+body {
+  padding: 0;
+  margin: 0;
+  font-family: "Inter" sans-serif;
+  background: linear-gradient(45deg, #131086, #b621f3);
+  padding: 40px;
+}
+
+.container {
+  min-height: calc(100vh - 80px);
+  display: grid;
+  grid-template-columns: 30% 70%;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.login-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 10px;
+  background-color: white;
+}
+
+/* .login-left-container {
+  grid-template-rows: 50% 50%;
+} */
+
+.login-left-container-top {
+  grid-column-start: 1;
+  grid-column-end: 3;
+  grid-row-start: 1;
+  grid-row-end: 3;
+  background-color: beige;
+  width: 335px;
+}
+
+.login-left-container-bottom {
+  grid-column-start: 1;
+  grid-column-end: 3;
+  grid-row-start: 3;
+  grid-row-end: 5;
+  background-color: aliceblue;
+  width: 335px;
+}
+
+.login-right {
+  background-color: #eee;
+  display: flex;
+  justify-content: content;
+}
+
+.btn-box {
+  display: inline-block;
+  vertical-align: middle;
+  width: 40px;
+  height: 20px;
+  border-radius: 100px;
+  background-color: #ccc;
+  box-shadow: 0px 3px 0px rgba(0, 0, 0, .13) inset;
+}
+
+.btn-box .btn {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #fff;
+  margin-left: 0;
+  /*動畫從ml為0開始*/
+  transition: .5s;
+  box-shadow: 1px 2px 5px rgba(0, 0, 0, .3);
+}
+
+.checkbox {
+  position: absolute;
+  opacity: 0;
+}
+
+.checkbox:checked+.btn-box {
+  background-color: #8f8;
+}
+
+.checkbox:checked+.btn-box .btn {
+  margin-left: 20px;
+}
+
+.login-right button{
+border: none;
+}
+.login-right button img{
+border: none;
+opacity: 0.3;
+}
+.login-right button:hover img{
+opacity: 1;
+}

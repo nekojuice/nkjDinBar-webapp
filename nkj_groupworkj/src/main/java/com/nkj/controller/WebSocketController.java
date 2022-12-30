@@ -19,10 +19,11 @@ public class WebSocketController {
 	//頁面請求
     @GetMapping("/{userId}")
     public ModelAndView socket(@PathVariable String userId) {
-        ModelAndView mav = new ModelAndView("/PiController");
+        ModelAndView mav = new ModelAndView("/PiController2.html");
         mav.addObject("userId", userId);
         return mav;
     }
+    
 
     //推送數據接口
     @ResponseBody
