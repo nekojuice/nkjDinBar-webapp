@@ -37,17 +37,29 @@
         websocket.onmessage = function (event) {
             //console.log(event);		
             if (event.data == "/java stream on") {
-                $('#iframe_stream').attr('src', 'http://127.0.0.1:5000/video');
+                $('#iframe_video').attr('src', 'http://127.0.0.1:5000/video');
                 setTimeout(function () {
-                    $('#iframe_stream').attr('src', 'http://127.0.0.1:5000/video');
+                    $('#iframe_video').attr('src', 'http://127.0.0.1:5000/video');
                 }, 2000); //ms
             }
             else if (event.data == "/java stream off") {
-                $('#iframe_stream').attr('src', 'http://127.0.0.1:5000/blank');
+                $('#iframe_video').attr('src', 'http://127.0.0.1:5000/blank');
+            }
+            else if (event.data == "/java audio on") {
+                $('#iframe_audio').attr('src', 'http://127.0.0.1:5000/audio');
+                /*setTimeout(function () {
+                    $('#iframe_audio').attr('src', 'http://127.0.0.1:5000/audio');
+                }, 2000);*/ //ms
+            }
+            else if (event.data == "/java audio off") {
+                $('#iframe_audio').attr('src', 'http://127.0.0.1:5000/blank');
             }
             else {
                 setMessageInnerHTML(event.data);
             }
+            
+
+            
         }
 
         //連接關閉的回調方法
@@ -89,24 +101,50 @@
                     if (e.code === "Enter") {
                         send();
                     }
+                    if (e.keyCode == '38') {
+                        // up arrow
+                    	websocket.send('/pi a 0 -8');
+                    }
+                    else if (e.keyCode == '40') {
+                        // down arrow
+                    	websocket.send('/pi a 0 8');
+                    }
+                    else if (e.keyCode == '37') {
+                       // left arrow
+                    	websocket.send('/pi a -8 0');
+                    }
+                    else if (e.keyCode == '39') {
+                       // right arrow
+                    	websocket.send('/pi a 8 0');
+                    }
                 });
 
                 $("#camera_on").click(function (e) {
                     if($('#camera_on').prop('checked')) {
-                    	websocket.send('/pi camera on');
+                    	websocket.send('/camera on');
                     }
                     else {
-                    	websocket.send('/pi camera off');
+                    	websocket.send('/camera off');
                     }
                 	
                 });
 
-                $("#auto_on").click(function (e) {
-                    if($('#auto_on').prop('checked')) {
-                    	websocket.send('/pi auto on');
+                $("#mic_on").click(function (e) {
+                    if($('#mic_on').prop('checked')) {
+                    	websocket.send('/mic on');
                     }
                     else {
-                    	websocket.send('/pi auto off');
+                    	websocket.send('/mic off');
+                    }
+                	
+                });
+                
+                $("#motor_on").click(function (e) {
+                    if($('#motor_on').prop('checked')) {
+                    	websocket.send('/m on');
+                    }
+                    else {
+                    	websocket.send('/m off');
                     }
                 	
                 });
@@ -125,95 +163,40 @@
                 	
                 });
                 
-                //啟動時就抓取現在step數
-                /*socket.emit('update_step_reqiure');
-                socket.on('update_step_response', function(data) {
-                    $('#horz_current').val(data[0]);
-                    $('#horz_current_bar').val(data[0]);
-                    $('#vert_current').val(data[0]);
-                    $('#vert_current_bar').val(data[1]);
-                    $('#horz_current_ang').val(data[0] / 4096 * 360);
-                    $('#vert_current_ang').val(data[1] / 4096 * 360);
+                $("#up").click(function (e) {
+                	websocket.send('/pi a 0 -8');
                 });
-    
-                socket.on('horz_current', function(data) {
-                    $('#horz_current').val(data);
-                    $('#horz_current_bar').val(data);
-                    $('#horz_current_ang').val(data / 4096 * 360);
+                $("#down").click(function (e) {
+                	websocket.send('/pi a 0 8');
                 });
-                socket.on('vert_current', function(data) {
-                    $('#vert_current').val(data);
-                    $('#vert_current_bar').val(data);
-                    $('#vert_current_ang').val(data / 4096 * 360);
+                $("#left").click(function (e) {
+                	websocket.send('/pi a -8 0');
                 });
-    
-                $("#d_7").click(function(e) {
-                    socket.emit('button_execute', -5, 5);
+                $("#right").click(function (e) {
+                	websocket.send('/pi a 8 0');
                 });
-                $("#d_8").click(function(e) {
-                    socket.emit('button_execute', 0, 5);
+                $("#zeropoint").click(function (e) {
+                	websocket.send('/pi t 0 0');
                 });
-                $("#d_9").click(function(e) {
-                    socket.emit('button_execute', 5, 5);
+                
+                
+                $("#ai_none").click(function (e) {
+                    	websocket.send('/ai1 off');
+                    	websocket.send('/ai2 off');
                 });
-                $("#d_4").click(function(e) {
-                    socket.emit('button_execute', -5, 0);
+                
+                $("#ai_1").click(function (e) {
+                    if($('#ai_1').prop('checked')) {
+                    	websocket.send('/ai1 on');
+                    	websocket.send('/ai2 off');
+                    }
                 });
-                $("#d_6").click(function(e) {
-                    socket.emit('button_execute', 5, 0);
+                $("#ai_2").click(function (e) {
+                    if($('#ai_2').prop('checked')) {
+                    	websocket.send('/ai1 off');
+                    	websocket.send('/ai2 on');
+                    }
                 });
-                $("#d_1").click(function(e) {
-                    socket.emit('button_execute', -5, -5);
-                });
-                $("#d_2").click(function(e) {
-                    socket.emit('button_execute', 0, -5);
-                });
-                $("#d_3").click(function(e) {
-                    socket.emit('button_execute', 5, -5);
-                });
-    
-                //歸零
-                $("#d_5").click(function(e) {
-                    socket.emit('zero_point_execute');
-                    $("#bar_vert").val(0);
-                    $("#bar_horz").val(0);
-                    $("#text_vert").val(0);
-                    $("#text_horz").val(0);
-                });
-    
-                //post文字方塊的數值
-                $("#execute").click(
-                        function(e) {
-                            socket.emit('coordinate_execute', $("#text_horz")
-                                    .val(), $("#text_vert").val());
-                        });
-    
-                //校正, CAL, 將目前角度設為原點
-                $("#cal_button").click(function(e) {
-                    socket.emit('calibration');
-                    $("#bar_vert").val(0);
-                    $("#bar_horz").val(0);
-                    $("#text_vert").val(0);
-                    $("#text_horz").val(0);
-                    $("#vert_change_ang").val(0);
-                    $("#horz_change_ang").val(0);
-                });
-                //重啟
-                $("#sys_restart").click(function(e) {
-                    socket.emit('sys_restart');
-                });
-                //關閉
-                $("#sys_shutdown").click(function(e) {
-                    socket.emit('sys_shutdown');
-                });
-    
-                //相機開關
-                $("#camera_on").click(function(e) {
-                    socket.emit('camera_switch', 'on');
-                });
-                $("#camera_off").click(function(e) {
-                    socket.emit('camera_switch', 'off');
-                });*/
             });
 
         //range bar 和 text 互相mapping
@@ -267,7 +250,14 @@
 				</div>
 				<div class="login-left-container-bottom">
 					<div class="position-absolute bottom-0">
-
+						<label>
+							<input type="checkbox" name="" id="admin_on" class="checkbox" checked="checked">
+							<span class="btn-box">
+								<span class="btn"></span>
+							</span>
+							<span class="text">管理員</span>
+						</label>
+						<br>
 						<label>
 							<input type="checkbox" name="" id="camera_on" class="checkbox">
 							<span class="btn-box">
@@ -276,32 +266,38 @@
 							<span class="text">相機</span>
 						</label>
 						<label>
-							<input type="checkbox" name="" id="auto_on" class="checkbox">
+							<input type="checkbox" name="" id="mic_on" class="checkbox">
 							<span class="btn-box">
 								<span class="btn"></span>
 							</span>
-							<span class="text">自動</span>
+							<span class="text">收音</span>
 						</label>
 						<label>
-							<input type="checkbox" name="" id="admin_on" class="checkbox" checked="checked">
+							<input type="checkbox" name="" id="motor_on" class="checkbox">
 							<span class="btn-box">
 								<span class="btn"></span>
 							</span>
-							<span class="text">管理員</span>
+							<span class="text">馬達</span>
 						</label>
+
 						<form>
 							AI模式
 							<br>
-							<input type="radio" name="cat" value="0" checked>
+							<input type="radio" name="cat" value="0" id='ai_none' checked>
 							無
 							<br>
-							<input type="radio" name="cat" value="1">
+							<input type="radio" name="cat" value="1" id='ai_1'>
 							ai1
 							<br>
-							<input type="radio" name="cat" value="2">
+							<input type="radio" name="cat" value="2" id='ai_2'>
 							2
 							<br>
 						</form>
+						
+						<button id="snapshot" onclick="snapshot()">拍照</button>
+						<br>
+						<iframe src="http://127.0.0.1:5000/blank" width="250" height="80" id="iframe_audio"></iframe>
+
 					</div>
 				</div>
 			</div>
@@ -328,7 +324,7 @@
 						</button>
 					</td>
 					<td>
-						<iframe src="http://127.0.0.1:5000/video" width="640" height="480" id="iframe_stream"></iframe>
+						<iframe src="http://127.0.0.1:5000/video" width="644" height="484" id="iframe_video"></iframe>
 					</td>
 					<td>
 						<button type="submit" id="right">
@@ -337,7 +333,9 @@
 					</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td>
+						<button id="zeropoint">歸零</button>
+					</td>
 					<td align="center" valign="center" style="vertical-align: top;">
 						<button type="submit" id="down">
 							<img class="img-fluid" src="/images/white-down-arrow.png" style="height: 72px">

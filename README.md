@@ -1,2 +1,4 @@
 # nkjDinBar-webapp
-groupwork project
+groupwork project 
+This is our project workspace.
+Under development!!

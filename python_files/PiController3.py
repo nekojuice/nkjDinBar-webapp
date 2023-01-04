@@ -7,9 +7,11 @@ import time
 from imutils.video import VideoStream
 import imagezmq
 import re
-import PiMotorFunction as piM
 import pyaudio
 import select
+
+import PiMotorFunction2 as piM
+import Pi_mic_send as mic
 
 # ADDR = ws://[ip]:[port]/[path...]/[sid(channel)]
 #ADDR = 'ws://127.0.0.1:8080/websocket/100'
@@ -52,20 +54,21 @@ def on_message(obj, msg):    # 接收訊息(自定義指令)
     if msg == "/pi hi":
         ws.send("[pi]>> hello, connection to pi is OK!")
     # 開關麥克風串流
-    if msg == "/pi mic on":
-        
-        
+    if msg == "/mic on":
+        thread_mic_recv()
         ws.send("[pi]>> raspberry mic switching on...")
-    if msg == "/pi mic off":
+        ws.send("/java audio on")
+    if msg == "/mic off":
         ws.send("/java mic off")
-
+        mic_send_stop()
         ws.send("[pi]>> raspberry mic switch off")
+        ws.send("/java audio off")
     # 開關相機, 同時開關串流
-    if msg == "/pi camera on":
+    if msg == "/camera on":
         ws.send("/java stream on")
         ws.send("[pi]>> raspberry camera switching on...")
         start_Stream_sender()
-    if msg == "/pi camera off":
+    if msg == "/camera off":
         ws.send("/java stream off")
         camera.release()
         ws.send("[pi]>> raspberry camera switch off")
@@ -78,11 +81,12 @@ def on_message(obj, msg):    # 接收訊息(自定義指令)
     if msg == "/pi show":
         ws.send("[pi]>> current: " + str(step_current) + " || target: " + str(step_target))
     # 開啟/關閉自動追蹤
-    if msg == "/pi auto on":
+    if msg == "/m on":
         ws.send("[pi]>> auto_run is on")
         auto_run()
-    if msg == "/pi auto off":
+    if msg == "/m off":
         ws.send("[pi]>> auto_run is off")
+        piM.motor_on_flag = False
         autorun_stop()
     # 設定target座標
     if re.match('/pi t', msg):
@@ -116,7 +120,7 @@ def run_x():
     global stop_autorun_flag
     try:
         while True:
-            step_current[0] += piM.Run_a_step('x', piM.check_direction(step_current[0], step_target[0]), 1000, SEQUENCE)[0]
+            step_current[0] += piM.Run_a_step('x', piM.check_direction(step_current[0], step_target[0]), 500, SEQUENCE)[0]
             if stop_autorun_flag == 1:
                 break
     except Exception as e: 
@@ -126,7 +130,7 @@ def run_y():
     global stop_autorun_flag
     try:
         while True:
-            step_current[1] += piM.Run_a_step('y', piM.check_direction(step_current[1], step_target[1]), 1000, SEQUENCE)[1]
+            step_current[1] += piM.Run_a_step('y', piM.check_direction(step_current[1], step_target[1]), 500, SEQUENCE)[1]
             if stop_autorun_flag == 1:
                 break
     except Exception as e: 
@@ -136,72 +140,16 @@ def run_y():
 
 
 ### 音訊發送 ###
-def audio_stop():
-    global audio_stop_flag
-    audio_stop_flag = 1
-def start_audio_sender():
+def mic_send():
     try:
-        ###### t3_Audio_sender = threading.Thread(target = audio_sender)
-        ###### t3_Audio_sender.start()
-        ws.send("/java mic on")
+        mic.audio_send()
     except:
-        pass
-
-# def audio_sender():
-#     try:
-#         ######## piAudio.audio_send()
-#     except:
-#         pass
-
-def audio_send():
-    FORMAT = pyaudio.paInt16
-    CHANNELS = 1
-    RATE = 8000
-    CHUNK = 2048
-
-    audio = pyaudio.PyAudio()
-
-    serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    serversocket.bind(('', 9999))
-    serversocket.listen(5)
-
-
-    def callback(in_data, frame_count, time_info, status):
-        for s in read_list[1:]:
-            s.send(in_data)
-        return (None, pyaudio.paContinue)
-
-
-    # start Recording
-    stream = audio.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK, stream_callback=callback)
-    # stream.start_stream()
-
-    read_list = [serversocket]
-    print("recording...")
-
-    try:
-        while True:
-            readable, writable, errored = select.select(read_list, [], [])
-            for s in readable:
-                if s is serversocket:
-                    (clientsocket, address) = serversocket.accept()
-                    read_list.append(clientsocket)
-                    print("Connection from", address)
-                else:
-                    data = s.recv(1024)
-                    if not data:
-                        read_list.remove(s)
-    except KeyboardInterrupt:
-        pass
-
-
-    print("finished recording")
-
-    serversocket.close()
-    # stop Recording
-    stream.stop_stream()
-    stream.close()
-    audio.terminate()
+        print('音訊串流發生例外而結束')
+def thread_mic_recv():
+    t_run_mic_send = threading.Thread(target = mic_send)
+    t_run_mic_send.start()
+def mic_send_stop():
+    mic.stopflag = True
 ### 音訊發送 ###
 
 

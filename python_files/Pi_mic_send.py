@@ -7,6 +7,9 @@ import select
 
 
 def audio_send():
+    global stopflag
+    stopflag = False
+    
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
     RATE = 8000
@@ -44,8 +47,12 @@ def audio_send():
                     data = s.recv(1024)
                     if not data:
                         read_list.remove(s)
+            if stopflag:
+                break
     except KeyboardInterrupt:
         pass
+    except Exception as e:
+        print(e)
 
 
     print("finished recording")

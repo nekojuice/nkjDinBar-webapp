@@ -7,39 +7,67 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>盯霸</title>
 <link rel="stylesheet" href="./sass/all.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+	integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous"
+	referrerpolicy="no-referrer"></script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#goLogin").click(function(e) {
+			location.href = '/login';
+		});
+
+		$("#goReg").click(function(e) {
+			location.href = '/login';
+		});
+
+		$("#goController").click(function(e) {
+			location.href = '/websocket/100';
+		});
+	});
+</script>
+
 </head>
 
 <body>
 	<nav class="navbar navbar-expand-lg bg-dark navbar-dark fixed-top">
 		<div class="container">
-			<a class="navbar-brand" href="#">盯霸</a> <span
-				class="navbar-toggler-iogglercon"></span>
+			<a class="navbar-brand" href="#">盯霸</a>
+			<span class="navbar-toggler-iogglercon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<ul class="navbar-nav ms-auto mb-2 mb-lg-0 me-2">
-					<li class="nav-item"><a class="nav-link active"
-						aria-current="page" href="#">首頁</a></li>
-					<li class="nav-item"><a class="nav-link" href="#">查詢</a></li>
-					<li class="nav-item dropdown"><a
-						class="nav-link dropdown-toggle" href="#" role="button"
-						data-bs-toggle="dropdown" aria-expanded="false"> 介紹 </a>
-					<li class="nav-item"><a class="nav-link active"
-						aria-current="page" href="#">聯絡我們</a></li>
+					<li class="nav-item">
+						<a class="nav-link active" aria-current="page" href="#">首頁</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#">查詢</a>
+					</li>
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"> 介紹 </a>
+					<li class="nav-item">
+						<a class="nav-link active" aria-current="page" href="#">聯絡我們</a>
+					</li>
 
 					<ul class="dropdown-menu">
-						<li><a class="dropdown-item" href="#">Action</a></li>
-						<li><a class="dropdown-item" href="#">Another action</a></li>
+						<li>
+							<a class="dropdown-item" href="#">Action</a>
+						</li>
+						<li>
+							<a class="dropdown-item" href="#">Another action</a>
+						</li>
 						<li>
 							<hr class="dropdown-divider">
 						</li>
-						<li><a class="dropdown-item" href="#">Something else here</a></li>
+						<li>
+							<a class="dropdown-item" href="#">Something else here</a>
+						</li>
 					</ul>
 					</li>
 					<li class="nav-item">
-						<button type="button" class="btn btn-primary">登入</button>
+						<button type="button" class="btn btn-primary" id="goLogin">登入</button>
 					</li>
 				</ul>
-				<button type="button" class="btn btn-primary">註冊</button>
+				<button type="button" class="btn btn-primary" id="goReg">註冊</button>
 			</div>
 		</div>
 	</nav>
@@ -48,7 +76,7 @@
 		<div class="container d-flex align-items-center h-100">
 			<div>
 				<h1 class="text-white">貓貓汁正盯著你</h1>
-				<button class="btn btn-primary col-10" type="button">開始</button>
+				<button class="btn btn-primary col-10" type="button" id="goController">開始</button>
 			</div>
 		</div>
 	</header>
@@ -196,14 +224,16 @@
 	<footer class="bg-dark mt-6 py-5">
 		<div class="container text-white d-flex justify-content-between">
 			<div class="h1">
-				盯霸<br>
+				盯霸
+				<br>
 				<div class="h6 mt-2">
 					自動追蹤
 					</h6>
 				</div>
 			</div>
 			<div class="h1">
-				連結<br>
+				連結
+				<br>
 				<div class="h6 d-flex justify-content-start mt-2">
 					首頁 介紹 關於我們
 					</h6>

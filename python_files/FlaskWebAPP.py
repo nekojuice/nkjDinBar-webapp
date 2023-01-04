@@ -1,12 +1,13 @@
 from websocket import WebSocketApp
 import cv2
-# import asyncio
 import threading
 from imutils.video import VideoStream
 import imagezmq
 from flask import Flask, Response, render_template
 import os
 import time
+
+import fl_mic_recv as mic
 
 import Pi_mic_send as piAudio
 import fl_Mediapipe_face_deceted as ai1
@@ -51,6 +52,18 @@ def video():
 def blank():
     return render_template('blank.html')
 
+@app.route('/audio')
+def playaudio():
+    return Response(mic.audio_receive(),mimetype="audio/x-wav;codec=pcm")
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html"), 404
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    return render_template("405.html"), 405
+
 def on_open(obj):
     print(obj, str("連線中..."))
 def on_error(obj, err):
@@ -63,16 +76,22 @@ def on_data(obj, msg, data, isContinue):
 def on_message(obj, msg):    # 接收自訂指令(訊息)
     if msg == "/fl hi":
         ws.send("[flask]>> hello, connection to python Flask webapp is OK!")
-    if msg == "/pi camera on":
+    if msg == "/camera on":
         t3_Stream_receiver.start()
+        
+    #if msg == "/mic on":
+        #thread_mic_recv()
+    if msg == "/mic off":
+        mic_recv_stop()
+        
     if msg == "/fl exit":
         ws.send("[flask]>> terminating process...")
         os._exit(0)
         
-    if msg == "/fl ai1 on":
+    if msg == "/ai1 on":
         ws.send("[flask]>> processing pi_Mediapipe_face_deceted.py...")
         thread_ai1()
-    if msg == "/fl ai1 off":
+    if msg == "/ai1 off":
         ws.send("[flask]>> terminating process: ai1")
         ai1_stop()
 
@@ -109,7 +128,19 @@ def run_ai1(scanrate):
 def ai1_stop():
     global ai1_stop_flag
     ai1_stop_flag = 1
-          
+
+def mic_recv():
+    try:
+        mic.audio_receive()
+    except:
+        print('音訊串流發生例外而結束')
+def thread_mic_recv():
+    t_run_mic_recv = threading.Thread(target = mic_recv)
+    t_run_mic_recv.start()
+def mic_recv_stop():
+    mic.stopflag = True
+
+
 def run_socket_app():
     global ws
     ws = WebSocketApp(
