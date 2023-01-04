@@ -101,6 +101,9 @@
                     if (e.code === "Enter") {
                         send();
                     }
+                    if (e.key === "p" || e.key === "P") {
+                    	websocket.send('/snapshot');
+                    }
                     if (e.keyCode == '38') {
                         // up arrow
                     	websocket.send('/pi a 0 -8');
@@ -161,6 +164,11 @@
                     	$('#send_command').hide();
                     }
                 	
+                });
+                
+                
+                $("#snapshot").click(function (e) {
+                	websocket.send('/snapshot');
                 });
                 
                 $("#up").click(function (e) {
@@ -287,14 +295,17 @@
 							無
 							<br>
 							<input type="radio" name="cat" value="1" id='ai_1'>
-							ai1
+							ai1: mediapipe face detect 單步移動模式
 							<br>
 							<input type="radio" name="cat" value="2" id='ai_2'>
-							2
+							ai2: mediapipe face detect 大步移動模式
+							<br>
+							<input type="radio" name="cat" value="3" id='ai_3'>
+							ai3: 暫無...  
 							<br>
 						</form>
 						
-						<button id="snapshot" onclick="snapshot()">拍照</button>
+						<button id="snapshot">拍照</button>
 						<br>
 						<iframe src="http://127.0.0.1:5000/blank" width="250" height="80" id="iframe_audio"></iframe>
 
