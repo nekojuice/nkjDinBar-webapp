@@ -13,6 +13,15 @@
 	referrerpolicy="no-referrer"></script>
 
 <script type="text/javascript" charset="utf-8">
+		//畫布初始化
+		var ctx;
+		var c;
+		window.onload = function() {
+			c = document.getElementById("myCanvas");
+		    ctx = c.getContext("2d");
+		    ctx.beginPath();
+		    ctx.stroke();
+		}
         var websocket = null;
         //判斷當前瀏覽器是否支持WebSocket
         if ('WebSocket' in window) {
@@ -32,10 +41,30 @@
         websocket.onopen = function () {
             setMessageInnerHTML("WebSocket連接成功");
         }
-
+		
+        const rect_strDetect = /\/rect /g;
         //接收到消息的回調方法
         websocket.onmessage = function (event) {
-            //console.log(event);		
+            //console.log(event);	
+            
+            //畫框
+            const msg = event.data;
+            if (rect_strDetect.test(msg)) {
+            	var cmd = (event.data).split(' ');
+            	if (cmd[1]=="cl") {
+                	ctx.clearRect(0, 0, c.width, c.height);
+                	ctx = c.getContext("2d");
+        		    ctx.beginPath();
+                	ctx.stroke();
+            	} 
+            	else {
+	            	ctx.rect(cmd[1], cmd[2], cmd[3], cmd[4]);
+	            	ctx.stroke();
+            	}
+            }
+            //用regex辦別
+            //應該改用array list收要框幾個
+            
             if (event.data == "/java stream on") {
                 $('#iframe_video').attr('src', 'http://127.0.0.1:5000/video');
                 setTimeout(function () {
@@ -93,12 +122,13 @@
             }
             //setMessageInnerHTML(message + "");
         }
+        
 
         $(document).ready(
             function () {
                 //java socketio test1
                 document.addEventListener('keydown', (e) => {
-                    if (e.code === "Enter") {
+                	if (e.code === "Enter") {
                         send();
                     }
                     if (e.key === "p" || e.key === "P") {
@@ -151,6 +181,36 @@
                     }
                 	
                 });
+                
+                $("#video_rec_on").click(function (e) {
+                    if($('#video_rec_on').prop('checked')) {
+                    	websocket.send('/rec v on');
+                    }
+                    else {
+                    	websocket.send('/rec v off');
+                    }
+                });
+                $("#audio_rec_on").click(function (e) {
+                    if($('#audio_rec_on').prop('checked')) {
+                    	websocket.send('/rec a on');
+                    }
+                    else {
+                    	websocket.send('/rec a off');
+                    }
+                });
+                $("#AV_rec_on").click(function (e) {
+                	if($('#video_rec_on').prop('checked')) {
+	                	$('#video_rec_on').click();
+	                	$('#audio_rec_on').click();
+                	}
+                    else {
+	                	$('#video_rec_on').click();
+	                	$('#audio_rec_on').click();
+                    }
+                });
+                
+                
+                
                 
                 $("#admin_on").click(function (e) {
                     if($('#admin_on').prop('checked')) {
@@ -287,6 +347,28 @@
 							</span>
 							<span class="text">馬達</span>
 						</label>
+						<br>
+						<label>
+							<input type="checkbox" name="" id="video_rec_on" class="checkbox">
+							<span class="btn-box">
+								<span class="btn"></span>
+							</span>
+							<span class="text">錄影</span>
+						</label>
+						<label>
+							<input type="checkbox" name="" id="audio_rec_on" class="checkbox">
+							<span class="btn-box">
+								<span class="btn"></span>
+							</span>
+							<span class="text">錄音</span>
+						</label>
+						<label>
+							<input type="checkbox" name="" id="AV_rec_on" class="checkbox">
+							<span class="btn-box">
+								<span class="btn"></span>
+							</span>
+							<span class="text">影音錄製</span>
+						</label>
 
 						<form>
 							AI模式
@@ -307,8 +389,9 @@
 						
 						<button id="snapshot">拍照</button>
 						<br>
+						<!-- 
 						<iframe src="http://127.0.0.1:5000/blank" width="250" height="80" id="iframe_audio"></iframe>
-
+ 						-->
 					</div>
 				</div>
 			</div>
@@ -335,7 +418,9 @@
 						</button>
 					</td>
 					<td>
-						<iframe src="http://127.0.0.1:5000/video" width="644" height="484" id="iframe_video"></iframe>
+						<canvas id="myCanvas" width="644" height="484" style="position:absolute; z-index:99;"></canvas>
+						<iframe src="http://127.0.0.1:5000/video" width="644" height="484" id="iframe_video" style="position:relative; z-index:98;"></iframe>
+						
 					</td>
 					<td>
 						<button type="submit" id="right">
@@ -357,6 +442,7 @@
 			</table>
 		</div>
 	</div>
+	
 </body>
 
 </html>

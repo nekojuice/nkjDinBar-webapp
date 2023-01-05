@@ -43,6 +43,13 @@ public class WebSocketServer {
         try {
             sendMessage("[Server]>> connect success");
             System.out.println("[Channel "+ sid + "] A client has successfully connected, connection: " + getOnlineCount());
+            for (WebSocketServer item : webSocketSet) {
+                try {
+                    item.sendMessage("/java connection " + getOnlineCount());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         } catch (IOException e) {
         	System.out.println("websocket IO Exception");
         }
@@ -58,6 +65,13 @@ public class WebSocketServer {
         //斷開連接情況下，更新主板佔用情況爲釋放
         System.out.println("[Channel "+ sid + "] A client has disconnected, connection: " + getOnlineCount());
         //這裏寫你 釋放的時候，要處理的業務
+        for (WebSocketServer item : webSocketSet) {
+            try {
+                item.sendMessage("/java connection " + getOnlineCount());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**

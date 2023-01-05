@@ -57,12 +57,21 @@ def on_message(obj, msg):    # 接收訊息(自定義指令)
     if msg == "/mic on":
         thread_mic_recv()
         ws.send("[pi]>> raspberry mic switching on...")
-        ws.send("/java audio on")
+        #ws.send("/java audio on")  # 重整控制面板的iframe 因為buffer要30秒先停用
     if msg == "/mic off":
         ws.send("/java mic off")
         mic_send_stop()
         ws.send("[pi]>> raspberry mic switch off")
-        ws.send("/java audio off")
+        #ws.send("/java audio off")
+    # 音訊錄製 
+    if msg == "/rec a on":
+        thread_mic_recv()
+        ws.send("[pi]>> raspberry mic switching on...")
+    if msg == "/rec a off":
+        ws.send("/java mic off")
+        mic_send_stop()
+        ws.send("[pi]>> raspberry mic switch off")
+    
     # 開關相機, 同時開關串流
     if msg == "/camera on":
         ws.send("/java stream on")
@@ -141,6 +150,7 @@ def run_y():
 
 ### 音訊發送 ###
 def mic_send():
+    mic.stopflag = False
     try:
         mic.audio_send()
     except:

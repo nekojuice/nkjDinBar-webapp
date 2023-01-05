@@ -93,7 +93,7 @@ class VCR:
         '''啟動位置'''
         threading.Thread(target=self.collect_mp4).start()
         while self.flag_read:
-            time.sleep(5)
+            time.sleep(2)
             
             print('準備寫入音訊')
             self.save_wave_file()

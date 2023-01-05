@@ -7,6 +7,8 @@ from flask import Flask, Response, render_template
 import os
 import time
 from datetime import datetime
+import numpy
+from scipy.io.wavfile import write
 
 import fl_mic_recv as mic
 
@@ -55,10 +57,22 @@ def on_message(obj, msg):    # 接收自訂指令(訊息)
         ws.send("[flask]>> hello, connection to python Flask webapp is OK!")
     if msg == "/camera on":
         t3_Stream_receiver.start()
-    #if msg == "/mic on":
-        #thread_mic_recv()
+    if msg == "/mic on":
+        thread_mic_recv()
+    
     if msg == "/snapshot":
         snapshot()
+        
+    if msg == "/rec v on":
+        thread_rec_video()
+    if msg == "/rec v off":
+        rec_video_stop()
+    
+    if msg == "/rec a on":
+        thread_rec_audio()
+    if msg == "/rec a off":
+        rec_audio_stop()
+        
     if msg == "/mic off":
         mic_recv_stop()
         
@@ -84,7 +98,10 @@ def Stream_receiver():
     try:
         while True:
             global image
+            #global image_timestamp
             rpi_name, image = image_hub.recv_image()
+            #image_timestamp = time.time()
+            #print(image_timestamp)
             # cv2.imshow(rpi_name, cv2.flip(image, 1)) # 1 window for each RPi
             cv2.waitKey(1)
             image_hub.send_reply(b'OK')
@@ -105,20 +122,66 @@ def gen_frames():   ## 這裡怪怪的
     except:
         print('串流生成失敗...可能相機未開或通信障礙')
 
+# 錄影存檔
+def thread_rec_video():
+    t_rec_video = threading.Thread(target = rec_video)
+    t_rec_video.start()
+def rec_video():
+    global rec_video_stopflag
+    rec_video_stopflag = False
+    timeString = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter(f"../../save_video/{timeString}.avi", fourcc, 20.0, (640,  480))
+    while not rec_video_stopflag:
+        out.write(image)
+        if rec_video_stopflag:
+            print("影像錄製中止")
+            out.release()
+            break
+        time.sleep(0.04)
+
+def rec_video_stop():
+    global rec_video_stopflag
+    rec_video_stopflag = True
+    
 # 拍照
 idx = 0
 total = 0
 def snapshot():
-    ct = datetime.now()
+    timeString = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
     global idx
     global total
     save_path = "../../save_image"  # 資料夾要先建好
-    p = os.path.sep.join([save_path, f"{ct.year}_{ct.month}_{ct.month}_{ct.day}_{ct.hour}_{ct.minute}_{ct.second}_{str(idx)}.png"])
+    p = os.path.sep.join([save_path, f"{timeString}_{str(idx)}.png"])
     cv2.imwrite(p, image)
     idx += 1
     total += 1
     print(f'{total} pictures saved...')
 
+# 音訊串流 網頁即時撥放
+def mic_recv():
+    try:
+        mic.audio_receive()
+    except:
+        print('音訊串流發生例外而結束')
+def thread_mic_recv():
+    t_run_mic_recv = threading.Thread(target = mic_recv)
+    t_run_mic_recv.start()
+def mic_recv_stop():
+    mic.stopflag = True
+    
+# 音訊存檔 python播放 結束後存檔
+def rec_audio():
+    try:
+        mic.audio_record()
+    except:
+        print('音訊串流發生例外而結束')
+def thread_rec_audio():
+    t_run_rec_audio = threading.Thread(target = rec_audio)
+    t_run_rec_audio.start()
+def rec_audio_stop():
+    mic.stopflag = True
+    
 # ai1 mediapipe 抓取人臉 單步模式
 def goCenter(start, end, bond):
     if start[0] < 320-(bond/2):
@@ -181,18 +244,6 @@ def run_ai2(scanrate):
 def ai2_stop():
     global ai2_stop_flag
     ai2_stop_flag = 1
-        
-# 音訊串流
-def mic_recv():
-    try:
-        mic.audio_receive()
-    except:
-        print('音訊串流發生例外而結束')
-def thread_mic_recv():
-    t_run_mic_recv = threading.Thread(target = mic_recv)
-    t_run_mic_recv.start()
-def mic_recv_stop():
-    mic.stopflag = True
 
 # websocket
 def run_socket_app():
