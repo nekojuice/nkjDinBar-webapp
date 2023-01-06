@@ -56,7 +56,7 @@ def on_message(obj, msg):    # 接收自訂指令(訊息)
     if msg == "/fl hi":
         ws.send("[flask]>> hello, connection to python Flask webapp is OK!")
     if msg == "/camera on":
-        t3_Stream_receiver.start()
+        t_stream_receiver.start()
     if msg == "/mic on":
         thread_mic_recv()
     
@@ -93,7 +93,7 @@ def on_message(obj, msg):    # 接收自訂指令(訊息)
         ai2_stop()
 
 # 影像串流 資料接收器
-def Stream_receiver():
+def stream_receiver():
     image_hub = imagezmq.ImageHub()
     try:
         while True:
@@ -267,5 +267,5 @@ if __name__ == '__main__':
     t1_run_socket_app.start()
     t2_run_flask_app = threading.Thread(target = run_flask_app)
     t2_run_flask_app.start()
-    t3_Stream_receiver = threading.Thread(target = Stream_receiver)
-    t3_Stream_receiver.start()
+    t_stream_receiver = threading.Thread(target = stream_receiver)
+    t_stream_receiver.start()

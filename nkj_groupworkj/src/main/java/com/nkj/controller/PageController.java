@@ -31,6 +31,11 @@ public class PageController {
 	public String login() {
 		return "login.html";
 	}
+
+	@RequestMapping("/contact")
+	public String contact() {
+		return "contact.html";
+	}
 	
 //	@ResponseStatus(value = HttpStatus.OK)
 //	@GetMapping(value = "/user/{name}")
