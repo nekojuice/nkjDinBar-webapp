@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/controller.css')}}">
+    <!-- JQuery 的 CDN 連結 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        
+    <!-- Socket.IO 的 CDN 連結 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"
+        integrity="sha512-WL6WGKMPBiM9PnHRYIn5YEtq0Z8XP4fkVb4qy7PP4vhmYQErJ/dySyXuFIMDf1eEYCXCrQrMJfkNwKc9gsjTjA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script type="text/javascript" charset="utf-8">
+    $(document).ready(function () {
+        var socket = io.connect();
+         /*
+            // Socket.IO send message
+            $("#send").click(function (e) {
+                // Send message
+                socket.emit('send', $('#message').val());
+                // Clear input field
+                $('#message').val('');
+            });
+                
+
+            // Socket.IO get message
+            socket.on('get', function (data) {
+                $('#chat_content').append('<p>I say: ' + data + '</p>');
+            });
+                
+            // Socket.IO get test
+            socket.on("message", function (data) {
+                $('#chat_content').append('<p>System : ' + data + '</p>');
+            });
+                
+            // Socket.IO send test
+            $("#test").click(function (e) {
+                socket.emit('test');
+            });
+        */
+        $("#d_7").click(function (e) {
+            socket.emit('clicktest', 123, 456);
+        
+        });
+    });
+    </script>
+</head>
+<body>
+    <button class='direction_button' type="button" id='d_7'>send emit</button>
+</body>
