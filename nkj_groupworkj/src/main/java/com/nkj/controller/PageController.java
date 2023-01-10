@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.nkj.RunNgrok;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
+import io.socket.client.Url;
 
 @SuppressWarnings("unused")
 @Controller
@@ -27,8 +29,10 @@ public class PageController {
 	}
 	
 	@RequestMapping("/login")
-	public String login() {
-		return "login.html";
+	public String login(Model model) {
+		String url = RunNgrok.javaPublicUrl;
+		model.addAttribute("publicURL", url);
+		return "login";
 	}
 
 	@RequestMapping("/contact")

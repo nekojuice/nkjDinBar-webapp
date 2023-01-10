@@ -1,25 +1,25 @@
 from websocket import WebSocketApp
 import cv2
 import threading
-from imutils.video import VideoStream
 import imagezmq
 from flask import Flask, Response, render_template
 import os
 import time
-from datetime import datetime
-import numpy
 from scipy.io.wavfile import write
+import re
 
 import fl_mic_recv as mic
 
-import Pi_mic_send as piAudio
 import fl_Mediapipe_face_deceted as ai1
+import fl_yolo_KCF_v3 as ai3
 
 
 app = Flask(__name__)
 ADDR = 'ws://127.0.0.1:8080/websocket/100'
 
-
+image = []
+frame2path = '../deepface_image/'
+ai3_stop_flag = False
 
 # 將jpg投到網址
 @app.route('/blank')
@@ -91,7 +91,23 @@ def on_message(obj, msg):    # 接收自訂指令(訊息)
     if msg == "/ai2 off":
         ws.send("[flask]>> terminating process: ai2")
         ai2_stop()
+        
+    if msg == "/ai3 on":
+        thread_ai3()
+    if msg == "/ai3 off":
+        stop_ai3()
+        os.remove(frame2path+'0.jpg')
+        stop_verify()
+        ws.send('/rect cl')
+        ws.send('/rect cl')
+    if re.match('/ai3 t', msg):
+        _ = list(map(int, re.split(' ', msg)[-1:]))[0]
+        print(_)
+        ai3.tracking_selector(image, int(_))
+        thread_verify()
+        
 
+        
 # 影像串流 資料接收器
 def stream_receiver():
     image_hub = imagezmq.ImageHub()
@@ -244,6 +260,48 @@ def run_ai2(scanrate):
 def ai2_stop():
     global ai2_stop_flag
     ai2_stop_flag = 1
+
+# ai3
+def thread_ai3():
+    global ai3_stop_flag
+    ai3_stop_flag = False
+    threading.Thread(target=run_ai3, daemon=True, args=()).start()
+def run_ai3():
+    print('ai3 防遮擋追蹤啟動!')
+    while not ai3_stop_flag:
+        try:
+            coordinate = ai3.ai3(image)
+            ws.send('/rect cl')
+            ws.send('/rect cl')
+            for i in range(len(coordinate)):
+                ws.send(f'/rect {coordinate[i][0]} {coordinate[i][1]} {coordinate[i][2]} {coordinate[i][3]} {coordinate[i][4]}')
+                ws.send(f'/rect {coordinate[i][0]} {coordinate[i][1]} {coordinate[i][2]} {coordinate[i][3]} {coordinate[i][4]}')
+        except:
+            pass
+        time.sleep(0.03)
+        if ai3_stop_flag:
+            break
+def stop_ai3():
+    global ai3_stop_flag
+    ai3_stop_flag = True
+    ai3.tracking = False
+
+def thread_verify():
+    threading.Thread(target=run_verify, daemon=True, args=()).start()
+def run_verify():
+    global ai3_verify_stop_flag
+    ai3_verify_stop_flag = False
+    while not ai3_verify_stop_flag:
+        ai3.verify(image)
+        time.sleep(0.5)
+        if ai3_verify_stop_flag:
+            break
+def stop_verify():
+    global ai3_verify_stop_flag
+    ai3_verify_stop_flag = True
+    ai3.tracking = False
+    
+
 
 # websocket
 def run_socket_app():

@@ -1,61 +1,230 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./css/login.css">
-    <title>註冊</title>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" th:href="@{./css/login.css}">
+<title>註冊</title>
+<script th:src="@{https://apis.google.com/js/api.js}"></script>
+<script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js}"
+	integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous"
+	referrerpolicy="no-referrer"></script>
+	
+<script th:src="@{./js/google_api.js}">
+	loadClient();
+</script>
+<script th:src="@{./js/Facebook_api.js}"></script>
+
+<script th:inline="javascript" charset="utf-8">
+	$(document).ready(
+        function () {
+            $("#login_google").click(function (e) {
+            	authenticate().then(loadClient);
+            });
+            $("#login_facebook").click(function (e) {
+            	fblogin();
+            });
+        });
+   var publicURL = /*[[${publicURL}]]*/ 'url';
+   var redirect = "https://" + publicURL.substr(8)
+   console.log(redirect);
+   //var redirect = "https://44ec-1-160-1-98.jp.ngrok.io/Youtube";
+   var apikey = "AIzaSyC0jPQ_aKzKy8c-tgb51KsWlI9yenvrnYc";
+   var clientid = "1060838685118-9id0hmf1nuos4iuql3brnk33br99erva.apps.googleusercontent.com";
+   var broadcast_id;
+   var streamId;
+   var streamtoken;
+   var streamstatus;
+   function delay(n){
+	    return new Promise(function(resolve){
+	        setTimeout(resolve,n*1000);
+	    });
+	}
+  function updatestreamstatus(){
+	  gapi.client.youtube.liveStreams.list({
+		  "part":["id","status"],
+		  "maxResults": 1,
+		  "mine":true
+	  }).then(function(response){streamstatus=response.result["items"][0]["status"]["streamStatus"]},
+			  function(err){console.error("Error liveStream status update ", err);})
+  }
+  function startlive(){
+	  gapi.client.youtube.liveBroadcasts.transition({
+		  "broadcastStatus": "live",
+		  "id": broadcast_id,
+		  "part": [
+    	  "id","snippet"
+          ]
+	  }).then(
+			  function(response){console.log("transition response",response)},
+			  function(err){console.error("error from transition",err)})
+  }
+  function authenticate() {
+    return gapi.auth2.getAuthInstance()
+        .signIn({scope: "https://www.googleapis.com/auth/youtube.force-ssl",prompt:"consent",redirect_uri:redirect})
+        .then(function() { console.log("Sign-in successful"); },
+              function(err) { console.error("Error signing in", err); });
+  }
+  function loadClient() {
+    gapi.client.setApiKey(apikey);
+    return gapi.client.load("https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest")
+        .then(function() { console.log("GAPI client loaded for API"); },
+              function(err) { console.error("Error loading GAPI client for API", err); });
+  }
+  // Make sure the client is loaded and sign-in is complete before calling this method.
+  async function execute() {
+	  var time = document.getElementById("start_time");
+	  var title = document.getElementById("title");
+	  time = time.value+"+08:00"
+	  const live_stream = gapi.client.youtube.liveStreams.insert({
+	      "part": [
+	          "snippet","cdn","contentDetails","status"
+	        ],
+	        "resource": {
+	          "snippet": {
+	        	  "title": "video",
+                  "description": "A description of your video stream. This field is optional."
+	          },
+	          "cdn": {
+	            "frameRate": "60fps",
+	            "ingestionType": "rtmp",
+	            "resolution": "1080p"
+	          },
+	          "contentDetails": {
+	            "isReusable": true
+	          }
+	        }
+	      })
+	          .then(async function(response) {
+	                  // Handle the results here (response.result has the parsed body).
+	                  var stream = response.result
+	                  var t=0;
+	                  streamId = stream["id"]
+	                  streamtoken = stream["cdn"]["ingestionInfo"]["streamName"]
+	                  streamstatus = stream["status"]["streamStatus"]
+	                  address = stream["cdn"]["ingestionInfo"]["ingestionAddress"]
+	                  document.getElementById("yourtoken").innerHTML="<br>1.開啟您的OBS軟體<br>2.按下來源左下方的+ 選擇瀏覽器，按下確定並將網址設置為 localhost:5000/video 後按下確定<br>3.設定-串流-伺服器輸入"+address+"<br>您的YOUTUBE直播金鑰輸入"+streamtoken+" 按下確認後即可開始串流"
+					  while(streamstatus != "active" && t<=100){
+							  t+=10;
+							  updatestreamstatus();
+                              console.log(t);
+                              await delay(10);
+					  };
+	                  startlive();
+	          		},
+	                function(err) { 
+	          			console.error("liveStreams_Execute error", err); 
+	          			}
+	          		);
+	  
+	  const broadcast = gapi.client.youtube.liveBroadcasts.insert({
+		  "part":[
+			  "id",
+			  "snippet",
+			  "contentDetails",
+			  "status"
+		  ],
+		  "resource":{
+			  "snippet":{
+				  "title":title.value,
+				  "scheduledStartTime":time,
+				  "actualStartTime":time
+			    },
+			  "status": {
+		          "privacyStatus": "public"
+		        }
+		  }
+	  }).then(function(response){
+		  broadcast_id = response.result.id
+		  console.log("broadcast_Response",response)
+	  },
+	  function(err){ console.error("liveBroadcasts_Execute error",err); }).then(function(res){
+	  gapi.client.youtube.liveBroadcasts.bind({
+	  "id":broadcast_id,
+	  "part":["snippet","status"],
+	  "streamId":streamId
+  	}).then(function(response){
+	  console.log("bind_Response",response);
+  		},function(err){console.error("bind_Execute error", err);})
+  }) 
+    return live_stream,broadcast;
+  }
+  
+  gapi.load("client:auth2", function() {
+    gapi.auth2.init({client_id: clientid,plugin_name: "hallo"});
+  });
+
+
+</script>
 </head>
 
 <body>
-    <div class="container">
-        <div class="login-left">
-            <div class="login-header">
-                <h1>盯霸</h1>
-                <p>登入來使用</p>
-            </div>
-            <form class="login-form">
-                <div class="login-form-content">
-                    <div class="form-item">
-                        <label for="email">請輸入信箱</label>
-                        <input type="text" id="email">
-                    </div>
-                    <div class="form-item">
-                        <label for="password">請輸入密碼</label>
-                        <input type="password" id="password">
-                    </div>
-                    <div class="form-item">
-                        <div class="checkbox">
-                            <input type="checkbox" id="rememberMeCheckbox" checked>
-                            <label for="rememberMeCheckbox" class="checkboxLabel">記住我</label>
-                        </div>
-                    </div>
-                    <button type="submit">登入</button>
-                    <button type="submit">註冊</button>
-                </div>
-                <div class="login-form-footer">
-                    <a href="#">
-                        <img width="30" src="./images/google.png" alt="">Google登入
-                    </a>
-                    <a href="#">
-                        <img width="30" src="./images/instagram.jpg" alt="">Instagram登入
-                    </a>
-                    <a href="#">
-                        <img width="30" src="./images/facebook.png" alt="">Facebook登入
-                    </a>
-                    <a href="#">
-                        <img width="30" src="./images/line.jpg" alt="">Line登入
-                    </a>
-                </div>
+	<div class="container">
+		<div class="login-left">
+			<div class="login-header">
+				<h1>盯霸</h1>
+				<p>登入來使用</p>
+			</div>
+			<form class="login-form">
+				<div class="login-form-content">
+					<div class="form-item">
+						<label for="email">請輸入信箱</label>
+						<input type="text" id="email">
+					</div>
+					<div class="form-item">
+						<label for="password">請輸入密碼</label>
+						<input type="password" id="password">
+					</div>
+					<div class="form-item">
+						<div class="checkbox">
+							<input type="checkbox" id="rememberMeCheckbox" checked>
+							<label for="rememberMeCheckbox" class="checkboxLabel">記住我</label>
+						</div>
+					</div>
+					<button type="submit">登入</button>
+					<button>註冊</button>
+				</div>
+			</form>
+			<div class="login-form-footer">
+				<a id="login_google">
+					<img width="30" src="./images/google.png" alt="">
+					Google登入
+				</a>
+				<br>
+				<a id="login_facebook">
+					<img width="30" src="./images/facebook.png" alt="">
+					Facebook登入
+				</a>
+			</div>
 
-            </form>
-        </div>
-        <div class="login-right">
-            <img class="img-fluid" src="./images/cat.png">
-        </div>
 
+		</div>
+		<div class="login-right">
+			<img class="img-fluid" src="./images/cat.png">
+		</div>
+		<!--
+		<button onclick="authenticate().then(loadClient)">authorize and load</button>
+		<input id="start_time" type="text" placeholder="YYYY-MM-DDThh:mm" value="">
+		<input id="title" type="text" placeholder="title">
+		<button id="getapi">execute</button>
+		<p id="yourtoken"></p>
+		-->
+
+		<script type="text/javascript">
+/*
+		var getapi = document.getElementById('getapi');
+		getapi.addEventListener('click',function(e){
+			execute().then(function(res){fetch(
+				'/apigetter?streamtoken='+ streamtoken +'&broadcast_id='+ broadcast_id + '&streamId=' + streamId)
+				.then(function(response){
+				console.log('apigetter',response.json())
+			},
+					function(err){console.error("apigetter ERR",err)}
+			)},function(err){console.error("execute.then err",err)})
+		});*/
+		</script>
 </body>
 
 </html>

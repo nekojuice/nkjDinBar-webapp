@@ -12,6 +12,10 @@
 	integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous"
 	referrerpolicy="no-referrer"></script>
 
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="../js/google_api.js">
+	loadClient()
+</script>
 <script type="text/javascript" charset="utf-8">
 		//畫布初始化
 		var ctx;
@@ -24,10 +28,16 @@
 		}
         var websocket = null;
         //判斷當前瀏覽器是否支持WebSocket
+        var url = window.location.href
         if ('WebSocket' in window) {
             //改成你的地址
-            websocket = new WebSocket(
-                "ws://127.0.0.1:8080/websocket/100");
+            if (url.substr(0, 5) == 'https') {
+            	websocket = new WebSocket(
+                	"wss://" + url.replace('https://', ''));
+            } else if (url.substr(0, 5) == 'http:') {
+                websocket = new WebSocket(
+                    "ws://" + url.replace('http://', ''));
+            }
         } else {
             alert('當前瀏覽器不支援 websocket')
         }
@@ -58,7 +68,7 @@
                 	ctx.stroke();
             	} 
             	else {
-	            	ctx.rect(cmd[1], cmd[2], cmd[3], cmd[4]);
+	            	ctx.rect(cmd[2], cmd[3], cmd[4], cmd[5]);
 	            	ctx.stroke();
             	}
             }
@@ -126,6 +136,10 @@
 
         $(document).ready(
             function () {
+                $("#login_google").click(function (e) {
+                	authenticate().then(loadClient);
+                });
+            	
                 //java socketio test1
                 document.addEventListener('keydown', (e) => {
                 	if (e.code === "Enter") {
@@ -383,12 +397,22 @@
 							ai2: mediapipe face detect 大步移動模式
 							<br>
 							<input type="radio" name="cat" value="3" id='ai_3'>
-							ai3: 暫無...  
+							ai3: 暫無...
 							<br>
 						</form>
-						
+
 						<button id="snapshot">拍照</button>
 						<br>
+						<input id="getapi" type="button" value="直播">
+						<input id="start_time" type="text" placeholder="2023-12-30T23:59" value="2023-12-30T23:59">
+						<input id="title" type="text" placeholder="title">
+						<br>
+						<a id="login_google">
+							<img width="30" src="../images/google.png" alt="">
+							Google登入
+						</a>
+						<br>
+						<p id="yourtoken"></p>
 						<!-- 
 						<iframe src="http://127.0.0.1:5000/blank" width="250" height="80" id="iframe_audio"></iframe>
  						-->
@@ -418,9 +442,9 @@
 						</button>
 					</td>
 					<td>
-						<canvas id="myCanvas" width="644" height="484" style="position:absolute; z-index:99;"></canvas>
-						<iframe src="http://127.0.0.1:5000/video" width="644" height="484" id="iframe_video" style="position:relative; z-index:98;"></iframe>
-						
+						<canvas id="myCanvas" width="644" height="484" style="position: absolute; z-index: 99;"></canvas>
+						<iframe src="http://127.0.0.1:5000/video" width="644" height="484" id="iframe_video" style="position: relative; z-index: 98;"></iframe>
+
 					</td>
 					<td>
 						<button type="submit" id="right">
@@ -442,7 +466,29 @@
 			</table>
 		</div>
 	</div>
-	
-</body>
 
+</body>
+<script>
+var streamtoken;
+var time = document.getElementById("start_time");
+var title = document.getElementById("title");
+var getapi = document.getElementById('getapi');
+getapi.addEventListener('click',function(e){
+	//if(true){
+		execute()
+		//.then(function(res){
+//可用 fetch() 傳輸後端並用then-response接收後端回傳
+/*			fetch(
+					'/apigetter?streamtoken='+ streamtoken 
+					+'&broadcast_id='+ broadcast_id 
+					+ '&streamId=' + streamId
+					)
+			.then(function(response){
+			console.log('apigetter',response.json())
+		},
+				function(err){console.error("apigetter ERR",err)}
+		)},function(err){console.error("execute.then err",err)})
+	}else{alert("please sign in google")}*/
+});
+</script>
 </html>
