@@ -13,6 +13,9 @@ import select
 import piMotorFunction2 as piM
 import pi_mic_send as mic
 
+stream_sender_stop_flag = True
+autorun_stop_flag = True
+
 # ADDR = ws://[ip]:[port]/[path...]/[sid(channel)]
 #ADDR = 'ws://127.0.0.1:8080/websocket/100'
 ADDR = 'ws://192.168.137.1:8080/websocket/100'
@@ -76,11 +79,11 @@ def on_message(obj, msg):    # 接收訊息(自定義指令)
     if msg == "/camera on":
         ws.send("/java stream on")
         ws.send("[pi]>> raspberry camera switching on...")
-        start_Stream_sender()
+        thread_stream_sender()
     if msg == "/camera off":
         ws.send("/java stream off")
-        camera.release()
         ws.send("[pi]>> raspberry camera switch off")
+        stream_sender_stop()
     # 遠端結束程序...如果有意外了話
     if msg == "/pi exit":
         ws.send("[pi]>> terminating process...")
@@ -89,7 +92,7 @@ def on_message(obj, msg):    # 接收訊息(自定義指令)
     # 顯示current/target座標
     if msg == "/pi show":
         ws.send("[pi]>> current: " + str(step_current) + " || target: " + str(step_target))
-    # 開啟/關閉自動追蹤
+    # 開啟/關閉馬達
     if msg == "/m on":
         ws.send("[pi]>> auto_run is on")
         auto_run()
@@ -111,42 +114,32 @@ def on_message(obj, msg):    # 接收訊息(自定義指令)
         b = step_target[1] if _[1] == 0 else step_current[1] + _[1]
         step_target = (piM.max_filter([a,b], STEP_MAX))
         
-### 自動移動鏡頭(current track target) ###
-def autorun_stop():
-    global stop_autorun_flag
-    stop_autorun_flag = 1
-    piM.GPIO.cleanup()
+### 馬達開關 ###
 def auto_run():
-    global stop_autorun_flag
-    stop_autorun_flag = 0
-    global t3
-    t3 = threading.Thread(target = run_x)
-    t3.start()
-    global t4
-    t4 = threading.Thread(target = run_y)
-    t4.start()
+    global autorun_stop_flag
+    autorun_stop_flag = False
+    threading.Thread(target = run_x).start()
+    threading.Thread(target = run_y).start()
 def run_x():
-    global stop_autorun_flag
+    global autorun_stop_flag
     try:
-        while True:
+        while not autorun_stop_flag:
             step_current[0] += piM.Run_a_step('x', piM.check_direction(step_current[0], step_target[0]), 500, SEQUENCE)[0]
-            if stop_autorun_flag == 1:
-                break
     except Exception as e: 
         print(e)
         print('run_x 發生錯誤')
 def run_y():
-    global stop_autorun_flag
+    global autorun_stop_flag
     try:
-        while True:
+        while not autorun_stop_flag:
             step_current[1] += piM.Run_a_step('y', piM.check_direction(step_current[1], step_target[1]), 500, SEQUENCE)[1]
-            if stop_autorun_flag == 1:
-                break
     except Exception as e: 
         print(e)
         print('run_y 發生錯誤')
-### 自動追蹤 ###
-
+def autorun_stop():
+    global autorun_stop_flag
+    autorun_stop_flag = True
+    piM.GPIO.cleanup()
 
 ### 音訊發送 ###
 def mic_send():
@@ -160,61 +153,42 @@ def thread_mic_recv():
     t_run_mic_send.start()
 def mic_send_stop():
     mic.stopflag = True
-### 音訊發送 ###
 
 
 ### 視訊發送 ###
-def start_Stream_sender():
-    try:
-        camera.release()
-    except:
-        pass
-    global t2_Stream_sender
-    t2_Stream_sender = threading.Thread(target = Stream_sender)
-    t2_Stream_sender.start()
-    ws.send("/java stream on")
-    
-def Stream_sender():
+def thread_stream_sender():
+    threading.Thread(target = stream_sender).start()
+def stream_sender():
+    global stream_sender_stop_flag
+    stream_sender_stop_flag = False
     try:
         global camera
         camera = cv2.VideoCapture(0, apiPreference=cv2.CAP_V4L)
         #sender = imagezmq.ImageSender(connect_to='tcp://127.0.0.1:5555')
         sender = imagezmq.ImageSender(connect_to='tcp://192.168.137.1:5555')
 
-        rpi_name = socket.gethostname() # send RPi hostname with each image
-        #camera.start()
-        #camera = VideoStream(usePiCamera=True).start()
-        time.sleep(1.0)  # allow camera sensor to warm up
-        while True:  # send images as stream until Ctrl-C
+        rpi_name = socket.gethostname() # 設定raspi hostname
+        time.sleep(1.0)
+        while not stream_sender_stop_flag:
             success, image = camera.read()
             if not success:
                 break
             else:
-                #image = camera.read()
                 sender.send_image(rpi_name, image)
+        camera.release()    # 跳出迴圈後清除相機
     except:
         print("串流異常")
-### 視訊發送 ###
+        camera.release()
+def stream_sender_stop():
+    global stream_sender_stop_flag
+    stream_sender_stop_flag = True
 
+# socket
 def socket_app():
     global ws
-    ws = WebSocketApp(
-        ADDR,
-        on_open=on_open,
-        on_message=on_message,
-        on_error=on_error,
-        on_close=on_close,
-        on_data=on_data)
+    ws = WebSocketApp(ADDR,on_open=on_open,on_message=on_message,on_error=on_error,on_close=on_close,on_data=on_data)
     ws.run_forever()
-
-# def socket_client():
-#     global ws
-#     ws = WebSocket()
-#     ws.connect(ADDR, origin=ADDR)
-    # ws.send("python say hi")
-    # print(ws.recv())
-    # ws.close()
+    
 
 if __name__ == '__main__':
-    t1_socket_app = threading.Thread(target = socket_app)
-    t1_socket_app.start()
+    threading.Thread(target = socket_app).start()

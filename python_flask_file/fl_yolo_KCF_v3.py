@@ -6,6 +6,7 @@ import math
 import torch
 from glob import glob
 from deepface import DeepFace
+import os
 
 
 # 接收攝影機串流影像，採用多執行緒的方式，降低緩衝區堆疊圖幀的問題。
@@ -24,8 +25,8 @@ counter = 0
 # yolov5及權重檔
 # model = torch.hub.load('ultralytics/yolov5', 'custom',
 #                        path='D:/Eclipse/Workspace/JavaEE/python_flask_file/yolo5model_exp3_best', force_reload=False)
-model = torch.hub.load('../yolov5','custom',source='local', path='python_flask_file/yolo5model_exp3_best', force_reload=True)
-path = '../deepface_image/'
+model = torch.hub.load('../yolov5','custom',source='local', path='./yolo5model_exp3_best', force_reload=True)
+path = './deepface_image/'
 
 
 # deepface辨識, 發生遮擋或意外時啟動
@@ -46,7 +47,7 @@ def verify(Frame):
         score = DeepFace.verify(
             Frame, Frame2, model_name='Facenet',
             distance_metric='cosine',
-            enforce_detection=False, detector_backend='ssd'
+            enforce_detection=False, detector_backend='mediapipe' #ssd
         )
         print(score)
         state = score['verified']
@@ -59,6 +60,7 @@ def verify(Frame):
 def verify_stop():
     global tracking
     tracking = False
+    os.remove(path+'0.jpg')
     print('deepface verify stop!')
 
 # 接收追蹤編號

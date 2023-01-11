@@ -70,7 +70,7 @@ def audio_receive():
 
 
 def audio_record():
-    save_path = "../../save_audio/"
+    save_path = "./record/save_audio/"
     timeString = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
     filename = save_path + timeString + ".wav"
     

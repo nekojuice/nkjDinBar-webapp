@@ -68,6 +68,10 @@
                 	ctx.stroke();
             	} 
             	else {
+        		    ctx.font = "bold 24px verdana";
+        		    ctx.fillStyle = "#00ff00";
+            		ctx.fillText(cmd[1], cmd[2], cmd[3]);
+        		    ctx.fillStyle = "#00ff00";
 	            	ctx.rect(cmd[2], cmd[3], cmd[4], cmd[5]);
 	            	ctx.stroke();
             	}
@@ -265,19 +269,45 @@
                 $("#ai_none").click(function (e) {
                     	websocket.send('/ai1 off');
                     	websocket.send('/ai2 off');
+                    	websocket.send('/ai3 off');
+                    	$('#ai3_target').hide();
                 });
                 
                 $("#ai_1").click(function (e) {
                     if($('#ai_1').prop('checked')) {
                     	websocket.send('/ai1 on');
                     	websocket.send('/ai2 off');
+                    	websocket.send('/ai3 off');
+                    	$('#ai3_target').hide();
                     }
                 });
                 $("#ai_2").click(function (e) {
                     if($('#ai_2').prop('checked')) {
                     	websocket.send('/ai1 off');
                     	websocket.send('/ai2 on');
+                    	websocket.send('/ai3 off');
+                    	$('#ai3_target').hide();
                     }
+                });
+                $("#ai_3").click(function (e) {
+                    if($('#ai_3').prop('checked')) {
+                    	websocket.send('/ai1 off');
+                    	websocket.send('/ai2 off');
+                    	websocket.send('/ai3 on');
+                    	$('#ai3_target').show();
+                    }
+                });
+                $("#ai3_target0").click(function (e) {
+                	websocket.send('/ai3 t 0');
+                });
+                $("#ai3_target1").click(function (e) {
+                	websocket.send('/ai3 t 1');
+                });
+                $("#ai3_target2").click(function (e) {
+                	websocket.send('/ai3 t 2');
+                });
+                $("#ai3_target3").click(function (e) {
+                	websocket.send('/ai3 t 3');
                 });
             });
 
@@ -383,7 +413,8 @@
 							</span>
 							<span class="text">影音錄製</span>
 						</label>
-
+						<br>
+						<button id="snapshot">拍照</button>
 						<form>
 							AI模式
 							<br>
@@ -391,21 +422,29 @@
 							無
 							<br>
 							<input type="radio" name="cat" value="1" id='ai_1'>
-							ai1: mediapipe face detect 單步移動模式
+							ai1: 臉部追蹤 緩慢
 							<br>
 							<input type="radio" name="cat" value="2" id='ai_2'>
-							ai2: mediapipe face detect 大步移動模式
+							ai2: 臉部追蹤 快速
 							<br>
 							<input type="radio" name="cat" value="3" id='ai_3'>
-							ai3: 暫無...
+							ai3: KCF 追蹤
 							<br>
 						</form>
+						<div id="ai3_target" hidden="true">
+						選擇目標<br>
+						<button id="ai3_target0">NO.0</button><button id="ai3_target1">NO.1</button><br>
+						<button id="ai3_target2">NO.2</button><button id="ai3_target3">NO.3</button>
+						</div>
 
-						<button id="snapshot">拍照</button>
+						
+						<br>
+						
+						<input id="start_time" type="text" placeholder="2023-12-30T23:59" value="2023-12-30T23:59">
+						<br>
+						<input id="title" type="text" placeholder="title">
 						<br>
 						<input id="getapi" type="button" value="直播">
-						<input id="start_time" type="text" placeholder="2023-12-30T23:59" value="2023-12-30T23:59">
-						<input id="title" type="text" placeholder="title">
 						<br>
 						<a id="login_google">
 							<img width="30" src="../images/google.png" alt="">
@@ -443,7 +482,7 @@
 					</td>
 					<td>
 						<canvas id="myCanvas" width="644" height="484" style="position: absolute; z-index: 99;"></canvas>
-						<iframe src="http://127.0.0.1:5000/video" width="644" height="484" id="iframe_video" style="position: relative; z-index: 98;"></iframe>
+						<iframe src="http://127.0.0.1:5000/blank" width="644" height="484" id="iframe_video" style="position: relative; z-index: 98;"></iframe>
 
 					</td>
 					<td>

@@ -5,6 +5,7 @@ import pyaudio
 import socket
 import select
 
+stopflag = True
 
 def audio_send():
     global stopflag
