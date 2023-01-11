@@ -16,7 +16,7 @@ import os
 track_stop_flag = False
 tracking = False
 tracker = cv2.TrackerCSRT_create()
-# Frame = []
+Frame1 = []
 Frame2 = []
 status = False
 state = True
@@ -33,7 +33,7 @@ path = './deepface_image/'
 # def verify_start(image):
 #         print('deepface verify started!')
 #         threading.Thread(target=verify, daemon=True, args=(image)).start()
-def verify(Frame):
+def verify():
     # verify fail counter
     global counter
     global state
@@ -45,7 +45,7 @@ def verify(Frame):
         else:
             counter = 0
         score = DeepFace.verify(
-            Frame, Frame2, model_name='Facenet',
+            Frame1, Frame2, model_name='Facenet',
             distance_metric='cosine',
             enforce_detection=False, detector_backend='mediapipe' #ssd
         )
@@ -112,6 +112,10 @@ def ai3(image):
                 # save 1 picture for our main character
                 _image = image[point[1]:point[1] +
                                point[3], point[0]:point[0]+point[2]]
+                global Frame1
+                Frame1 = image[point[1]:point[1] +
+                               point[3], point[0]:point[0]+point[2]]
+                
                 pic_list = glob(path + '*')
 
                 if len(pic_list) < 1:

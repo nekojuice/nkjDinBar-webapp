@@ -50,6 +50,7 @@
         //連接成功建立的回調方法
         websocket.onopen = function () {
             setMessageInnerHTML("WebSocket連接成功");
+        	websocket.send('/fl checkstatus');
         }
 		
         const rect_strDetect = /\/rect /g;
@@ -85,24 +86,49 @@
                     $('#iframe_video').attr('src', 'http://127.0.0.1:5000/video');
                 }, 2000); //ms
             }
-            else if (event.data == "/java stream off") {
+            if (event.data == "/java stream off") {
                 $('#iframe_video').attr('src', 'http://127.0.0.1:5000/blank');
             }
-            else if (event.data == "/java audio on") {
-                $('#iframe_audio').attr('src', 'http://127.0.0.1:5000/audio');
+            //else if (event.data == "/java audio on") {
+            //    $('#iframe_audio').attr('src', 'http://127.0.0.1:5000/audio');
                 /*setTimeout(function () {
                     $('#iframe_audio').attr('src', 'http://127.0.0.1:5000/audio');
                 }, 2000);*/ //ms
+            //}
+            //else if (event.data == "/java audio off") {
+            //    $('#iframe_audio').attr('src', 'http://127.0.0.1:5000/blank');
+            //}
+            if (event.data == "/status camera False") {
+            	$('#camera_on').prop("checked", true);
+            	$('#iframe_video').attr('src', 'http://127.0.0.1:5000/video')
             }
-            else if (event.data == "/java audio off") {
-                $('#iframe_audio').attr('src', 'http://127.0.0.1:5000/blank');
+            if (event.data == "/status mic False") {
+            	$('#mic_on').prop("checked", true);
             }
-            else {
+            if (event.data == "/status motor False") {
+            	$('#motor_on').prop("checked", true);
+            }
+            if (event.data == "/status rec_video False") {
+            	$('#video_rec_on').prop("checked", true);
+            	if ($('#video_rec_on').prop('checked') && $('#audio_rec_on').prop('checked')) {
+            		$('#AV_rec_on').prop("checked", true);
+            	}
+            }
+            if (event.data == "/status rec_audio False") {
+            	$('#audio_rec_on').prop("checked", true);
+            	if ($('#video_rec_on').prop('checked') && $('#audio_rec_on').prop('checked')) {
+            		$('#AV_rec_on').prop("checked", true);
+            	}
+            }
+            
+            const filter1 = /\/rect /g;
+            const filter2 = /\/pi /g;
+            if (!filter1.test(msg) && !filter2.test(msg)) {
                 setMessageInnerHTML(event.data);
             }
             
 
-            
+
         }
 
         //連接關閉的回調方法
@@ -203,27 +229,51 @@
                 $("#video_rec_on").click(function (e) {
                     if($('#video_rec_on').prop('checked')) {
                     	websocket.send('/rec v on');
+                    	if ($('#video_rec_on').prop('checked') && $('#audio_rec_on').prop('checked')) {
+                    		$('#AV_rec_on').prop("checked", true);
+                    	}
                     }
                     else {
                     	websocket.send('/rec v off');
+                    	if (!$('#video_rec_on').prop('checked') || !$('#audio_rec_on').prop('checked')) {
+                    		$('#AV_rec_on').prop("checked", false);
+                    	}
                     }
                 });
                 $("#audio_rec_on").click(function (e) {
                     if($('#audio_rec_on').prop('checked')) {
                     	websocket.send('/rec a on');
+                    	if ($('#video_rec_on').prop('checked') && $('#audio_rec_on').prop('checked')) {
+                    		$('#AV_rec_on').prop("checked", true);
+                    	}
                     }
                     else {
                     	websocket.send('/rec a off');
+                       	if (!$('#video_rec_on').prop('checked') || !$('#audio_rec_on').prop('checked')) {
+                    		$('#AV_rec_on').prop("checked", false);
+                    	}
                     }
                 });
                 $("#AV_rec_on").click(function (e) {
-                	if($('#video_rec_on').prop('checked')) {
-	                	$('#video_rec_on').click();
-	                	$('#audio_rec_on').click();
+                	if($('#AV_rec_on').prop('checked')) {
+	                	if (!$('#video_rec_on').prop("checked")) {
+	                		websocket.send('/rec v on');
+	                	}
+	                	if (!$('#audio_rec_on').prop("checked")) {
+		                	websocket.send('/rec a on');
+	                	}
+                		$('#video_rec_on').prop("checked", true);
+	                	$('#audio_rec_on').prop("checked", true);
                 	}
                     else {
-	                	$('#video_rec_on').click();
-	                	$('#audio_rec_on').click();
+	                	if ($('#video_rec_on').prop("checked")) {
+	                		websocket.send('/rec v off');
+	                	}
+	                	if ($('#audio_rec_on').prop("checked")) {
+	                		websocket.send('/rec a off');
+	                	}
+                		$('#video_rec_on').prop("checked", false);
+	                	$('#audio_rec_on').prop("checked", false);
                     }
                 });
                 

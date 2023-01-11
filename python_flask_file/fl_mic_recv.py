@@ -7,6 +7,9 @@ import sys
 import wave
 import time
 
+stopflag = True
+rec_stopflag = True
+
 def genHeader(sampleRate, bitsPerSample, channels):
     datasize = 2000*10**6
     o = bytes("RIFF",'ascii')                                               # (4byte) Marks file as RIFF
@@ -74,8 +77,8 @@ def audio_record():
     timeString = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
     filename = save_path + timeString + ".wav"
     
-    global stopflag
-    stopflag = False
+    global rec_stopflag
+    rec_stopflag = False
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
     RATE = 8000
@@ -98,7 +101,7 @@ def audio_record():
             data = s.recv(CHUNK)
             stream.write(data)          # 撥放
             frames.append(data)          # 將聲音記錄到串列中
-            if stopflag:
+            if rec_stopflag:
                 break
     except KeyboardInterrupt:
         pass

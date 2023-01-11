@@ -20,6 +20,8 @@ image = []
 frame2path = './deepface_image/'
 
 stream_receiver_stop_flag = True
+ai1_stop_flag = True
+ai2_stop_flag = True
 ai3_stop_flag = True
 
 rec_video_stopflag = True
@@ -109,13 +111,26 @@ def on_message(obj, msg):           # 接收自訂指令(訊息)
         print(_)
         ai3.tracking_selector(image, int(_))
         thread_verify()
+    if msg == "/fl checkstatus":
+        ws.send(f'/status camera {stream_receiver_stop_flag}')
+        time.sleep(0.1)
+        ws.send(f'/status mic {mic.stopflag}')
+        time.sleep(0.1)
+        ws.send(f'/status ai1 {ai1_stop_flag}')
+        time.sleep(0.1)
+        ws.send(f'/status ai2 {ai2_stop_flag}')
+        time.sleep(0.1)
+        ws.send(f'/status ai3 {ai3_stop_flag}')
+        time.sleep(0.1)
+        ws.send(f'/status rec_video {rec_video_stopflag}')
+        time.sleep(0.1)
+        ws.send(f'/status rec_audio {mic.rec_stopflag}')
         
         
 # 影像串流 資料接收器
 def thread_stream_receiver():
     threading.Thread(target = stream_receiver).start()
 def stream_receiver():
-    image_hub = imagezmq.ImageHub()
     global stream_receiver_stop_flag
     stream_receiver_stop_flag = False
     try:
@@ -305,7 +320,7 @@ def run_verify():
     ai3_verify_stop_flag = False
     while not ai3_verify_stop_flag:
         try:
-            ai3.verify(image)
+            ai3.verify()
         except:
             pass
         time.sleep(1)
@@ -324,9 +339,13 @@ def run_socket_app():
 # flask
 def run_flask_app():
     app.run(host='0.0.0.0', port='5000')
-    
+
+# imagehub
+def run_imagehub():
+    global image_hub
+    image_hub = imagezmq.ImageHub()
 
 if __name__ == '__main__':
-    threading.Thread(target = run_socket_app).start()
-    threading.Thread(target = run_flask_app).start()
-
+    threading.Thread(target = run_socket_app).start()   # websocket client
+    threading.Thread(target = run_flask_app).start()    # flask server
+    threading.Thread(target = run_imagehub).start()     # imagezmq server

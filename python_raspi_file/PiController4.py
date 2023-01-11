@@ -53,6 +53,8 @@ def on_data(obj, msg, data, isContinue):
 def on_message(obj, msg):    # 接收訊息(自定義指令)
     global step_current
     global step_target
+    if msg == "/fl checkstatus":
+        ws.send(f'/status motor {autorun_stop_flag}')
     # 測試連線是否通
     if msg == "/pi hi":
         ws.send("[pi]>> hello, connection to pi is OK!")
