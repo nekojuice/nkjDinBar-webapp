@@ -33,20 +33,18 @@ public class MemberRepository {
 				new CustomerMapper());
 	}
 
+	public List<MemberModel> select(String emailString) {
+		System.out.println("EXCUTE SELECT MEMBER");
+		return jdbcTemplate.query("SELECT `PASSWORD` FROM `memberinfo` WHERE `EMAIL`='" + emailString + "'",
+				new CustomerMapper());
+	}
+
 	private static final class CustomerMapper implements RowMapper<MemberModel> {
 
 		public MemberModel mapRow(ResultSet rs, int rowNum) throws SQLException {
 
-			return new MemberModel(
-
-					rs.getInt("id"),
-
-					rs.getString("email"),
-
-					rs.getString("password")
-
-			);
-
+			return new MemberModel(rs.getString("email"), rs.getString("password"), rs.getString("role"));
 		}
 	}
+
 }

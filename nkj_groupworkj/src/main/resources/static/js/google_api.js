@@ -1,6 +1,4 @@
-var publicURL = /*[[${publicURL}]]*/ 'url';
-var redirect = "https://" + publicURL.substr(8)+"/login"
-//var redirect = publicURL;
+var redirect = " https://a7b8-1-160-23-171.jp.ngrok.io/";
 var apikey = "AIzaSyC0jPQ_aKzKy8c-tgb51KsWlI9yenvrnYc";
 var clientid = "1060838685118-9id0hmf1nuos4iuql3brnk33br99erva.apps.googleusercontent.com";
 var broadcast_id;
@@ -9,9 +7,10 @@ var streamtoken;
 var streamstatus;
 var t=0;
 var broadcaststatus;
-var person;
 var sign;
-
+var name;
+var password;
+var email;
 //初始化google api
 gapi.load("client:auth2", function() {
     gapi.auth2.init({client_id: clientid,plugin_name: "hallo"});
@@ -37,14 +36,13 @@ function authenticate() {
     const googleauth = gapi.auth2.getAuthInstance();
     googleauth.isSignedIn.listen(updatesigninstatus);
   return googleauth
-      .signIn({scope: "https://www.googleapis.com/auth/youtube.force-ssl",redirect_uri:redirect}) //,prompt:"consent"
+      .signIn({scope: "https://www.googleapis.com/auth/youtube.force-ssl",prompt:"consent",redirect_uri:redirect})
       .then(function(response) {
           console.log("Sign-in successful",response);
-          person = {
-                  "name":response.getBasicProfile().getName(),
-                  "email":response.getBasicProfile().getEmail(),
-                  "id":response.getBasicProfile().getId()
-                  }
+                		name=response.getBasicProfile().getName()
+                        email=response.getBasicProfile().getEmail()
+                        password=response.getBasicProfile().getId()
+                        sign=true
           },
             function(err) { console.error("Error signing in", err); });
 }
@@ -58,7 +56,10 @@ function updatesigninstatus(issignedin){
 //登出函數
 function signout(){
     const googleauth = gapi.auth2.getAuthInstance();
-    person=null;
+    name=null;
+    email=null;
+    password=null;
+    sign=false;
     return googleauth.signOut();
 }
 

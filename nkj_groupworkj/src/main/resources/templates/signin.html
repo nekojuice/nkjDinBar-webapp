@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="./css/login.css">
+<title>註冊</title>
+<script>
+	$('#login-button').click(function() {
+		// 获取用户输入的帐号和密码
+		var email = $('#email-input').val();
+		var password = $('#password-input').val();
+
+		// 使用 AJAX 向服务器端发送请求
+		$.ajax({
+			url : '/doLogin',
+			method : 'POST',
+			data : {
+				email : email,
+				password : password
+			},
+			success : function(response) {
+				// 在收到服务器端的回应后显示警告框
+				if (response === '帳號或密碼錯誤') {
+					alert(response);
+				} else {
+					//// 在成功登录后做其他处理
+				}
+			}
+		});
+	});
+</script>
+</head>
+
+<body>
+	<div class="container">
+		<div class="login-left">
+			<div class="login-header">
+				<h1>盯霸</h1>
+				<p>登入來使用</p>
+			</div>
+			<form class="login-form" action="/createMember" name="data">
+				<div class="login-form-content">
+					<div class="form-item">
+						<label for="email">請輸入信箱</label> <input type="text" id="email"
+							name="data">
+					</div>
+					<div class="form-item">
+						<label for="password">請輸入密碼</label> <input type="password"
+							id="password" name="data">
+					</div>
+					<div class="form-item">
+						<div class="checkbox">
+							<input type="checkbox" id="rememberMeCheckbox" checked> <label
+								for="rememberMeCheckbox" class="checkboxLabel">記住我</label>
+						</div>
+					</div>
+					<div>
+						<p th:text="${message}"></p>
+					</div>
+					<button name="data" type="submit" id="login-button">註冊</button>
+				</div>
+			</form>
+		</div>
+		<div class="login-right">
+			<img class="img-fluid" src="./images/cat.png">
+		</div>
+</body>
+
+</html>
