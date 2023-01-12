@@ -36,6 +36,7 @@
 		$("#goController").click(function(e) {
 			if('[[${session.uid}]]' == "" || '[[${session.uid}]]' == null || '[[${session.uid}]]' == undefined) {
 				alert('請先登入');
+				location.href = '/login';
 			}else if ('[[${session.uid}]]'.length>0) {
 				location.href = '/websocket/100';
 			}
