@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="shortcut icon" href="/images/icon.png" type="image/x-icon">
 <link rel="stylesheet" href="/css/control_style.css">
 <title>控制介面</title>
 <!-- JQuery 的 CDN 連結 -->
@@ -163,13 +164,14 @@
             //setMessageInnerHTML(message + "");
         }
         
-
+        
         $(document).ready(
             function () {
+            	
                 $("#login_google").click(function (e) {
                 	authenticate().then(loadClient);
                 });
-            	
+                
                 //java socketio test1
                 document.addEventListener('keydown', (e) => {
                 	if (e.code === "Enter") {
@@ -487,19 +489,21 @@
 						<button id="ai3_target2">NO.2</button><button id="ai3_target3">NO.3</button>
 						</div>
 
-						
+						<br>
+						直播標題<input id="title" type="text" placeholder="title">
+						<br>
+						開始時間<input id="start_time" type="text" placeholder="2023-12-30T23:59" value="2023-12-30T23:59">
+						<br>
 						<br>
 						
-						<input id="start_time" type="text" placeholder="2023-12-30T23:59" value="2023-12-30T23:59">
+						<button id="login_google" style="width: 120px; height: 32px">
+							確認登入狀態
+						</button>
+						<button id="getapi" type="button" value="開始直播" style="width: 120px; height: 32px">
+						開始直播
+						</button>
 						<br>
-						<input id="title" type="text" placeholder="title">
-						<br>
-						<input id="getapi" type="button" value="直播">
-						<br>
-						<a id="login_google">
-							<img width="30" src="../images/google.png" alt="">
-							Google登入
-						</a>
+
 						<br>
 						<p id="yourtoken"></p>
 						<!-- 
