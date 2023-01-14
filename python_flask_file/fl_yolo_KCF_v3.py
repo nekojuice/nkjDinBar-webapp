@@ -95,8 +95,14 @@ def arr_sort(a):    # 多重目標編號
         ind = np.where(a == i)[0][0]
         order.append(ind)
     return order
+
+# prev_time = 0
 def ai3(image):
     # while True:
+        # cur_time = time.time()
+        # global prev_time
+        # print(f'FPS:{1/(cur_time - prev_time)}')
+        # prev_time = cur_time
         if tracking:
             success, point = tracker.update(image)
             if success:
