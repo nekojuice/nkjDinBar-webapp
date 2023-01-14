@@ -17,13 +17,12 @@ import com.nkj.springWebSocket.WebSocketServer;
 @RequestMapping("/websocket")
 public class WebSocketController {
 	//頁面請求
-    @GetMapping("/{userId}")
+	@GetMapping("/{userId}")
     public ModelAndView socket(@PathVariable String userId) {
-        ModelAndView mav = new ModelAndView("/PiController2.html");
+        ModelAndView mav = new ModelAndView("PiController2");
         mav.addObject("userId", userId);
         return mav;
     }
-    
 
     //推送數據接口
     @ResponseBody
