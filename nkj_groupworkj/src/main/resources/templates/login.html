@@ -7,11 +7,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="./css/login.css">
 <title>登入</title>
-<link rel="shortcut icon" href="/images/icon.png" type="image/x-icon">
+<link rel="shortcut icon" href="./images/icon.png" type="image/x-icon">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://apis.google.com/js/api.js"></script>
-<script src="js/google_api.js"></script>
-<script src="js/Facebook_api.js"></script>
+<script src="./js/google_api.js"></script>
+<script src="./js/Facebook_api.js"></script>
 </head>
 
 <body>
@@ -21,7 +21,7 @@
 				<h1>盯霸</h1>
 				<p>登入來使用</p>
 			</div>
-			<form class="login-form" action="/doLogin" name="data">
+			<form class="login-form" action="./doLogin" name="data">
 				<div class="login-form-content">
 					<div class="form-item">
 						<label for="email">請輸入信箱</label> <input type="text" id="email"
@@ -63,13 +63,13 @@ google.addEventListener('click',function(e){
 	//可用 fetch() 傳輸後端
 		authenticate().then(loadClient).then(function(){
 			fetch(
-					'/doApiLogin?email='+ email 
+					'./doApiLogin?email='+ email 
 					+'&password='+ password
 					+'&loginstatus='+ sign
 					)
 			    .then(function(response){
 			        console.log('google登入傳送後端成功',response)
-			        if('[[${session.uid}]]'!=null){location.assign("/");}
+			        if('[[${session.uid}]]'!=null){location.assign("../");}
 		        },
 				function(err){console.error("google登入傳送後端錯誤",err)}
 		)},function(err){console.error("google登入錯誤",err)})
@@ -83,7 +83,7 @@ function checkfblogin(){
 		console.log('2')
 		console.log('[[${session.uid}]]')
 		fetch(
-				'/doApiLogin?email='+ fbemail 
+				'./doApiLogin?email='+ fbemail 
 				+'&password='+ fbpassword
 				+'&loginstatus='+ fbsign
 				)
@@ -91,7 +91,7 @@ function checkfblogin(){
 		        console.log('fb登入傳送後端成功',response)
 		        console.log('3')
 				console.log('[[${session.uid}]]')
-		        location.assign("/")
+		        location.assign("./")
 	            },
 			    function(err){console.error("fb登入傳送後端錯誤",err)}
 	            

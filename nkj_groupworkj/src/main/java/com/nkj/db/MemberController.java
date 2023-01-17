@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @RestController
-
 public class MemberController {
 	@Autowired
 	MemberModel memberModel;
@@ -45,7 +44,7 @@ public class MemberController {
 			userDAO.insert(memberModel);
 			// redirectAttrs.addFlashAttribute("message", "已成功註冊帳號");
 			attributes.addAttribute("message", "已成功註冊帳號！！！");
-			return new RedirectView("/");
+			return new RedirectView("./");
 		}
 	}
 
@@ -91,7 +90,7 @@ public class MemberController {
 
 			System.out.println("成功登入!");
 			attributes.addAttribute("message", "已成功登入！！！");
-			return new RedirectView("/");
+			return new RedirectView("./");
 		} else {
 			System.out.println("帳號或密碼錯誤!!");
 			System.out.println(password);
@@ -141,7 +140,7 @@ public class MemberController {
 	@RequestMapping("/deletesession")
 	public void deletesession(HttpSession session, HttpServletResponse response) throws IOException {
 		session.removeAttribute("uid");
-		response.sendRedirect("/");
+		response.sendRedirect("./");
 	}
 
 }

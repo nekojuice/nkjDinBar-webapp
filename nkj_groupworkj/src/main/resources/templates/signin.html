@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="./css/login.css">
-<link rel="shortcut icon" href="/images/icon.png" type="image/x-icon">
+<link rel="shortcut icon" href="./images/icon.png" type="image/x-icon">
 <title>註冊</title>
 <script>
 	$('#login-button').click(function() {
@@ -16,7 +16,7 @@
 
 		// 使用 AJAX 向服务器端发送请求
 		$.ajax({
-			url : '/doLogin',
+			url : './doLogin',
 			method : 'POST',
 			data : {
 				email : email,
@@ -42,7 +42,7 @@
 				<h1>盯霸</h1>
 				<p>登入來使用</p>
 			</div>
-			<form class="login-form" action="/createMember" name="data">
+			<form class="login-form" action="./createMember" name="data">
 				<div class="login-form-content">
 					<div class="form-item">
 						<label for="email">請輸入信箱</label> <input type="text" id="email"

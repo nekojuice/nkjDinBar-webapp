@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>盯霸</title>
 <link rel="stylesheet" href="./sass/all.css">
-<link rel="shortcut icon" href="/images/icon.png" type="image/x-icon">
+<link rel="shortcut icon" href="./images/icon.png" type="image/x-icon">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
 	integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous"
 	referrerpolicy="no-referrer"></script>
@@ -23,23 +23,23 @@
 				signout();
 				fblogout();
 				alert('你已登出');
-				location.href ='/deletesession';
+				location.href ='./deletesession';
 			}else{
-				location.href = '/login';
+				location.href = './login';
 			}
 			
 		});
 		
 		$("#goReg").click(function(e) {
-			location.href = '/signin';
+			location.href = './signin';
 		});
 
 		$("#goController").click(function(e) {
 			if('[[${session.uid}]]' == "" || '[[${session.uid}]]' == null || '[[${session.uid}]]' == undefined) {
 				alert('請先登入');
-				location.href = '/login';
+				location.href = './login';
 			}else if ('[[${session.uid}]]'.length>0) {
-				location.href = '/websocket/100';
+				location.href = './websocket/100';
 			}
 		});
 	});
@@ -59,7 +59,7 @@
 					</li>
 					<li class="nav-item dropdown">
 					<li class="nav-item">
-						<a class="nav-link active" aria-current="page" href="/contact">關於我們</a>
+						<a class="nav-link active" aria-current="page" href="./contact">關於我們</a>
 					</li>
 					</li>
 					<li class="nav-item">
@@ -121,7 +121,7 @@
 				連結
 				<br>
 				<div class="h6 d-flex justify-content-start mt-2">
-					<a href="#">首頁</a>&nbsp&nbsp&nbsp&nbsp<a href="/contact">關於我們</a>
+					<a href="#">首頁</a>&nbsp&nbsp&nbsp&nbsp<a href="./contact">關於我們</a>
 					</h6>
 				</div>
 			</div>
